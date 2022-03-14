@@ -1,6 +1,12 @@
+from typing import Optional, Any
+
 import numpy as np
 from dataclasses import dataclass
 
+
+@dataclass
+class DefaultVal:
+    val: Any
 
 @dataclass
 class InputFrame(object):
@@ -12,7 +18,7 @@ class InputFrame(object):
 class ScoreBoard:
     image: np.ndarray
     frame_count: int
-    bbox: list
+    bbox: np.ndarray
 
 
 @dataclass
@@ -21,4 +27,8 @@ class Result:
     name_1: str
     name_2: str
     serving_player: str
-    score : str
+    score_1 : str
+    score_2 : str
+
+
+

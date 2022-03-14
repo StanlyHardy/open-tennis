@@ -1,3 +1,4 @@
+import json
 import os
 from pathlib import Path
 
@@ -7,6 +8,7 @@ import yaml
 from easydict import EasyDict as edict
 
 from src.controllers.ocr import alphabets, crnn
+from src.utils.csv_logger import CSV_Logger
 
 ROOT_DIR = Path(__file__).parents[1]
 ASSETS_DIR = os.path.join(ROOT_DIR, "assets/configs")
@@ -15,10 +17,11 @@ CONFIGURATION_FILE = os.path.join(ASSETS_DIR, "app_config.yaml")
 
 
 class AppContext(object):
-    GT_FILE_PATH = "assets/data/top-100-shots-rallies-2018-atp-season-scoreboard-annotations.json"
+    GT_FILE_PATH = "assets/data/gt/top-100-shots-rallies-2018-atp-season-scoreboard-annotations.json"
     stream = open(CONFIGURATION_FILE, 'r')
     streamer_profile = yaml.load(stream, Loader=yaml.Loader)["streamer"]
     stream.close()
+    csv_logger = CSV_Logger()
 
     with open("assets/configs/text_rec_config.yaml", 'r') as f:
         text_rec_config = yaml.load(f, Loader=yaml.FullLoader)
@@ -40,6 +43,8 @@ class AppContext(object):
     in_h = 640 if (model_h is None or isinstance(model_h, str)) else model_h
     input_name = session.get_inputs()[0].name
 
+    with open(GT_FILE_PATH, "r") as file:
+        gt_ann = json.load(file)
     if streamer_profile["debug"]:
         print("Input Layer: ", session.get_inputs()[0].name)
         print("Output Layer: ", session.get_outputs()[0].name)

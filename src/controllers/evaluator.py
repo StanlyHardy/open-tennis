@@ -6,8 +6,7 @@ from src.utils.daos import Result
 
 class Evaluator(AppContext):
     def __init__(self):
-        with open(self.GT_FILE_PATH, "r") as file:
-            self.gt_ann = json.load(file)
+        pass
 
     def trigger(self, data : Result):
         pass

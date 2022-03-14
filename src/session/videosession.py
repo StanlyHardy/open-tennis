@@ -29,3 +29,6 @@ class VideoSession(SessionContext):
     def _switch_off(self):
         self.video.release()
         cv2.destroyAllWindows()
+
+    def get_frame_count(self):
+        return self.frame_count
