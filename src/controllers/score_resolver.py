@@ -3,13 +3,18 @@ import cv2
 
 from src import AppContext
 from src.controllers.score_detector import ScoreDetector
-from src.interfaces.streamer import Streamer
+from src.session.image_session import ImageStreamer
+from src.session.videosession import VideoSession
 from src.utils.daos import InputFrame
 
 
 class ScoreResolver(AppContext):
     def __init__(self):
-        self.camera = Streamer()
+        if self.streamer_profile["evaluation"]:
+            self.camera = ImageStreamer()
+        else:
+            self.camera = VideoSession()
+
         self.score_detector = ScoreDetector()
         self.frame_count = 0
 

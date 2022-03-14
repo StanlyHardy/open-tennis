@@ -14,7 +14,6 @@ CONFIGURATION_FILE = os.path.join(ASSETS_DIR, "app_config.yaml")
 
 
 class AppContext(object):
-
     stream = open(CONFIGURATION_FILE, 'r')
     streamer_profile = yaml.load(stream, Loader=yaml.Loader)["streamer"]
     stream.close()
@@ -25,7 +24,6 @@ class AppContext(object):
 
     text_rec_config.DATASET.ALPHABETS = alphabets.alphabet
     text_rec_config.MODEL.NUM_CLASSES = len(text_rec_config.DATASET.ALPHABETS)
-
 
     sess_options = rt.SessionOptions()
 

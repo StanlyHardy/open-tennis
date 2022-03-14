@@ -1,10 +1,11 @@
 import cv2
-from src import AppContext
+from src.session.session_context import SessionContext
 
 
-class Streamer(AppContext):
+class VideoSession(SessionContext):
 
     def __init__(self):
+        super().__init__()
         self.video = cv2.VideoCapture(self.streamer_profile["video_path"])
         print("Input Video Path : ", self.streamer_profile["video_path"])
 
@@ -20,27 +21,11 @@ class Streamer(AppContext):
 
         self.set_overlay_frame(frame)
         self.set_detection_frame(frame)
-
-    def set_overlay_frame(self, frame):
-        self.overlayframe = frame.copy()
-
-    def set_detection_frame(self, frame):
-        self.detection_frame = frame.copy()
-
-    def get_detection_frame(self):
-        return self.detection_frame
-
-    def get_overlay_frame(self):
-        return self.overlayframe
-
-    def is_interrupted(self):
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            return True
-        return False
+        self.frame_count += 1
 
     def __del__(self):
-        self.switch_off()
+        self._switch_off()
 
-    def switch_off(self):
+    def _switch_off(self):
         self.video.release()
         cv2.destroyAllWindows()
