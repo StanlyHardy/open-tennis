@@ -10,6 +10,15 @@ class InputFrame(object):
 
 @dataclass
 class ScoreBoard:
-    image : np.ndarray
-    frame_count:int
-    bbox : list
+    image: np.ndarray
+    frame_count: int
+    bbox: list
+
+
+@dataclass
+class Result:
+    scoreboard: ScoreBoard
+    name_1: str
+    name_2: str
+    serving_player: str
+    score : str

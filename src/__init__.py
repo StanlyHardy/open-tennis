@@ -13,7 +13,9 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets/configs")
 CONFIGURATION_FILE = os.path.join(ASSETS_DIR, "app_config.yaml")
 
 
+
 class AppContext(object):
+    GT_FILE_PATH = "assets/data/top-100-shots-rallies-2018-atp-season-scoreboard-annotations.json"
     stream = open(CONFIGURATION_FILE, 'r')
     streamer_profile = yaml.load(stream, Loader=yaml.Loader)["streamer"]
     stream.close()

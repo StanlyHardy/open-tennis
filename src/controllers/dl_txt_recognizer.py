@@ -1,13 +1,14 @@
-
 import cv2
 import numpy as np
 import torch
 from torch.autograd import Variable
 
 from src import AppContext
+from src.controllers.evaluator import Evaluator
 from src.controllers.ocr import crnn
 from src.utils import ocr_utils
-from src.utils.daos import ScoreBoard
+from src.utils.csv_logger import CSV_Logger
+from src.utils.daos import ScoreBoard, Result
 
 
 class DLTextRecognizer(AppContext):
@@ -23,6 +24,8 @@ class DLTextRecognizer(AppContext):
             self.text_rec_model.load_state_dict(checkpoint)
         self.text_rec_model.eval()
         self.converter = ocr_utils.strLabelConverter(self.text_rec_config.DATASET.ALPHABETS)
+        self.evaluator = Evaluator()
+        self.csv_logger = CSV_Logger()
 
     def divide_image(self, image):
         h, w = image.shape
@@ -38,15 +41,19 @@ class DLTextRecognizer(AppContext):
 
         return [upper_part, lower_part]
 
-    def recognition(self,  patches, score_board : ScoreBoard):
-
-        for patch in patches:
+    def recognition(self, patches, score_board: ScoreBoard):
+        name_1, name_2 = "", ""
+        serving_player, score = "", ""
+        for j in range(len(patches)):
+            patch = patches[j]
             h, w = patch.shape
 
-            img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.MODEL.IMAGE_SIZE.H / h, fy=self.text_rec_config.MODEL.IMAGE_SIZE.H / h,
+            img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.MODEL.IMAGE_SIZE.H / h,
+                             fy=self.text_rec_config.MODEL.IMAGE_SIZE.H / h,
                              interpolation=cv2.INTER_CUBIC)
             h, w = img.shape
-            w_cur = int(img.shape[1] / (self.text_rec_config.MODEL.IMAGE_SIZE.OW / self.text_rec_config.MODEL.IMAGE_SIZE.W))
+            w_cur = int(
+                img.shape[1] / (self.text_rec_config.MODEL.IMAGE_SIZE.OW / self.text_rec_config.MODEL.IMAGE_SIZE.W))
             img = cv2.resize(img, (0, 0), fx=w_cur / w, fy=1.0, interpolation=cv2.INTER_CUBIC)
             img = np.reshape(img, (self.text_rec_config.MODEL.IMAGE_SIZE.H, w_cur, 1))
 
@@ -65,9 +72,25 @@ class DLTextRecognizer(AppContext):
             preds_size = Variable(torch.IntTensor([preds.size(0)]))
             sim_pred = self.converter.decode(preds.data, preds_size.data, raw=False)
             print('results: {0}'.format(sim_pred))
-            result = str(score_board.frame_count) + "^" +sim_pred
-            with open('assets/recognition.txt', 'a') as fd:
-                fd.write(f'{result}\n')
+            result = str(score_board.frame_count) + "^" + sim_pred
+            name_score_partition = sim_pred.partition("_")
+            name = name_score_partition[0]
+            score = name_score_partition[2]
+            serving_player = ""
+            if ">" in name:
+                name = name[1:]
+                if j == 0:
+                    serving_player = "name_1"
+                else:
+                    serving_player = "name_2"
+            if j == 0:
+                name_1 = name
+            else:
+                name_2 = name
+
+        final_result = Result(score_board, name_1, name_2, serving_player, score)
+        self.csv_logger.store(final_result)
+        self.evaluator.trigger(final_result)
 
     def run(self, score_board: ScoreBoard):
         patches = self.divide_image(score_board.image)
