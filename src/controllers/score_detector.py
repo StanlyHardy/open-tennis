@@ -11,7 +11,9 @@ from src.utils.detector_utils import letterbox_image, non_max_suppression, scale
 
 
 class ScoreDetector(AppContext):
-
+    """
+    Detect the location of the scoreboard
+    """
     def __init__(self):
         if self.streamer_profile["ocr_engine"] == "PyTesseract":
             print("Initializing OCR Backend : PyTesseract")
@@ -20,16 +22,28 @@ class ScoreDetector(AppContext):
             print("Initializing OCR Backend : CRNN")
             self.text_recognizer = DLTextRecognizer()
 
-    def preprocess_image(self, pil_image, in_size=(640, 640)):
-
-        in_w, in_h = in_size
-        resized = letterbox_image(pil_image, (in_w, in_h))
-        img_in = np.transpose(resized, (2, 0, 1)).astype(np.float32)  # HWC -> CHW
+    def preprocess_image(self, pil_image):
+        """
+        Preprocess the input frame
+        :param pil_image: image on which the detection has to be made
+        :param in_size: size of the input
+        :return: Preprocessed imagedata
+        """
+        resized = letterbox_image(pil_image, (self.in_w, self.in_h))
+        img_in = np.transpose(resized, (2, 0, 1)).astype(np.float32)
         img_in /= 255.0
         img_in = np.expand_dims(img_in, axis=0)
         return img_in
 
     def post_processing(self, detections, image_src, threshold, frame_count):
+        """
+        Postprocess the detection and pass it to the Player recognizers :func:`~src.ocr.ocr_core.recognize
+        :param detections:
+        :param image_src:
+        :param threshold:
+        :param frame_count:
+        :return:
+        """
         boxs = detections[..., :4].numpy()
         confs = detections[..., 4].numpy()
         if isinstance(image_src, str):

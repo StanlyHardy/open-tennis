@@ -10,6 +10,9 @@ from src.utils.daos import ScoreBoard, Result
 
 
 class DLTextRecognizer(OCRCore):
+    """
+    CRNN based scoreboard text recognizer.
+    """
     def __init__(self):
         super().__init__()
 
@@ -26,6 +29,11 @@ class DLTextRecognizer(OCRCore):
         self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.ALPHABETS)
 
     def preprocess(self, patch):
+        """
+        Preprocess the input image patch.
+        :param patch: patch that needs to be preprocessed.
+        :return:
+        """
         h, w = patch.shape
         img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.model.img_size.h / h,
                          fy=self.text_rec_config.model.img_size.h / h,
@@ -47,6 +55,11 @@ class DLTextRecognizer(OCRCore):
         return img
 
     def analyze(self, patches, score_board: ScoreBoard):
+        """
+        Analyze the input patch for the occurrence of the scoreboard
+        :param patches: patches that were cut previously
+        :param score_board: scoreboard data object
+        """
         result = {}
         for k, patch in patches.items():
 
@@ -78,6 +91,10 @@ class DLTextRecognizer(OCRCore):
         self.process_result(result, score_board)
 
     def recognize(self, score_board: ScoreBoard):
+        """
+        Recognize the player data in the input scoreboard
+        :param score_board: Scoreboard that has got the player data.
+        """
         score_board_img = cv2.cvtColor(score_board.image.copy(), cv2.COLOR_BGR2GRAY)
         patches = self.divide_image(score_board_img)
         self.analyze(patches, score_board)

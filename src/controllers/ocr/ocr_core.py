@@ -118,3 +118,10 @@ class OCRCore(AppContext):
         if self.streamer_profile["evaluation"]:
             if str(score_board.frame_count) in self.gt_ann.keys():
                 self.csv_logger.store(result)
+
+    def recognize(self):
+        """
+        Implementation overriden by the Tesseract or CRNN based recognizer
+        :return:
+        """
+        pass
