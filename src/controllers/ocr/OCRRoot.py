@@ -3,7 +3,7 @@ import difflib
 import cv2
 
 from src import AppContext
-from src.controllers.evaluator import Evaluator
+from src.utils.daos import ScoreBoard, Result
 
 
 class OCRRoot(AppContext):
@@ -46,3 +46,29 @@ class OCRRoot(AppContext):
         patch = cv2.resize(
             patch, (0, 0), fx=enlarge_ratio, fy=enlarge_ratio)
         return patch
+
+    def draw(self, score_board: ScoreBoard, result: Result):
+        score_board.raw_img = \
+            self.render.draw_boundary(score_board.raw_img.copy(), score_board.raw_img)
+
+        score_board.raw_img = \
+            self.render.draw_boundary(score_board.raw_img.copy(), score_board.raw_img)
+
+        self.render.text(score_board.raw_img, "Player 1: {}".format(result.name_1.title()),
+                         coordinate=(870, 940))
+        self.render.text(score_board.raw_img, "Score:    {}".format(result.score_1),
+                         coordinate=(870, 980))
+
+        self.render.text(score_board.raw_img, "Player 2: {}".format(result.name_2.title()),
+                         coordinate=(1370, 940))
+        self.render.text(score_board.raw_img, "Score:    {}".format(result.score_2),
+                         coordinate=(1370, 990))
+        if result.serving_player == "unknown":
+            draw_text = "Recognizing..."
+        elif result.serving_player == "name_1":
+            draw_text = result.name_1
+        else:
+            draw_text = result.name_2
+
+        self.render.text(score_board.raw_img, "Serving Player: {}".format(draw_text),
+                         coordinate=(880, 870))

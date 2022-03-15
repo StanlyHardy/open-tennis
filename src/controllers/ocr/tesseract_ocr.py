@@ -72,19 +72,19 @@ class TesserTextRecognizer(OCRRoot):
                 result["score_1"] = score.lower().strip()
             else:
                 result["score_2"] = score.lower().strip()
+        result["bbox"] = score_board.bbox.tolist()
+        result["frame_count"] = score_board.frame_count
+        if "serving_player" not in result.keys():
+            result["serving_player"] = "unknown"
+        result = Result(score_board=score_board,
+                        name_1=result["name_1"],
+                        name_2=result["name_2"],
+                        serving_player=result["serving_player"],
+                        score_1=result["score_1"],
+                        score_2=result["score_2"])
 
+        self.draw(score_board, result)
         if str(score_board.frame_count) in self.gt_ann.keys():
-
-            result["bbox"] = score_board.bbox.tolist()
-            result["frame_count"] = score_board.frame_count
-            if "serving_player" not in result.keys():
-                result["serving_player"] = "unknown"
-            result = Result(score_board=score_board,
-                            name_1=result["name_1"],
-                            name_2=result["name_2"],
-                            serving_player=result["serving_player"],
-                            score_1=result["score_1"],
-                            score_2=result["score_2"])
             self.csv_logger.store(result)
 
     def run(self, score_board: ScoreBoard):

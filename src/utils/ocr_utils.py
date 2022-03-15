@@ -1,67 +1,4 @@
-import torch.optim as optim
-import time
-from pathlib import Path
-import os
 import torch
-
-
-def get_optimizer(config, model):
-    optimizer = None
-
-    if config.TRAIN.OPTIMIZER == "sgd":
-        optimizer = optim.SGD(
-            filter(lambda p: p.requires_grad, model.parameters()),
-            lr=config.TRAIN.LR,
-            momentum=config.TRAIN.MOMENTUM,
-            weight_decay=config.TRAIN.WD,
-            nesterov=config.TRAIN.NESTEROV
-        )
-    elif config.TRAIN.OPTIMIZER == "adam":
-        optimizer = optim.Adam(
-            filter(lambda p: p.requires_grad, model.parameters()),
-            lr=config.TRAIN.LR,
-        )
-    elif config.TRAIN.OPTIMIZER == "rmsprop":
-        optimizer = optim.RMSprop(
-            filter(lambda p: p.requires_grad, model.parameters()),
-            lr=config.TRAIN.LR,
-            momentum=config.TRAIN.MOMENTUM,
-            weight_decay=config.TRAIN.WD,
-            # alpha=config.TRAIN.RMSPROP_ALPHA,
-            # centered=config.TRAIN.RMSPROP_CENTERED
-        )
-
-    return optimizer
-
-
-def create_log_folder(cfg, phase='train'):
-    root_output_dir = Path(cfg.OUTPUT_DIR)
-    # set up logger
-    if not root_output_dir.exists():
-        print('=> creating {}'.format(root_output_dir))
-        root_output_dir.mkdir()
-
-    dataset = cfg.DATASET.DATASET
-    model = cfg.MODEL.NAME
-
-    time_str = time.strftime('%Y-%m-%d-%H-%M')
-    checkpoints_output_dir = root_output_dir / dataset / model / time_str / 'checkpoints'
-
-    print('=> creating {}'.format(checkpoints_output_dir))
-    checkpoints_output_dir.mkdir(parents=True, exist_ok=True)
-
-    tensorboard_log_dir = root_output_dir / dataset / model / time_str / 'log'
-    print('=> creating {}'.format(tensorboard_log_dir))
-    tensorboard_log_dir.mkdir(parents=True, exist_ok=True)
-
-    return {'chs_dir': str(checkpoints_output_dir), 'tb_dir': str(tensorboard_log_dir)}
-
-
-def get_batch_label(d, i):
-    label = []
-    for idx in i:
-        label.append(list(d.labels[idx].values())[0])
-    return label
 
 
 class strLabelConverter(object):
@@ -151,18 +88,3 @@ class strLabelConverter(object):
                 index += l
             return texts
 
-
-def get_char_dict(path):
-    with open(path, 'rb') as file:
-        char_dict = {num: char.strip().decode('gbk', 'ignore') for num, char in enumerate(file.readlines())}
-
-
-def model_info(model):  # Plots a line-by-line description of a PyTorch model
-    n_p = sum(x.numel() for x in model.parameters())  # number parameters
-    n_g = sum(x.numel() for x in model.parameters() if x.requires_grad)  # number gradients
-    print('\n%5s %50s %9s %12s %20s %12s %12s' % ('layer', 'name', 'gradient', 'parameters', 'shape', 'mu', 'sigma'))
-    for i, (name, p) in enumerate(model.named_parameters()):
-        name = name.replace('module_list.', '')
-        print('%5g %50s %9s %12g %20s %12.3g %12.3g' % (
-            i, name, p.requires_grad, p.numel(), list(p.shape), p.mean(), p.std()))
-    print('Model Summary: %g layers, %g parameters, %g gradients\n' % (i + 1, n_p, n_g))

@@ -22,7 +22,7 @@ class DLTextRecognizer(OCRRoot):
         else:
             self.text_rec_model.load_state_dict(checkpoint)
         self.text_rec_model.eval()
-        self.converter = ocr_utils.strLabelConverter(self.text_rec_config.DATASET.ALPHABETS)
+        self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.ALPHABETS)
 
     def recognition(self, patches, score_board: ScoreBoard):
         result = {}
@@ -30,17 +30,17 @@ class DLTextRecognizer(OCRRoot):
 
             h, w = patch.shape
 
-            img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.MODEL.IMAGE_SIZE.H / h,
-                             fy=self.text_rec_config.MODEL.IMAGE_SIZE.H / h,
+            img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.model.img_size.h / h,
+                             fy=self.text_rec_config.model.img_size.h / h,
                              interpolation=cv2.INTER_CUBIC)
             h, w = img.shape
             w_cur = int(
-                img.shape[1] / (self.text_rec_config.MODEL.IMAGE_SIZE.OW / self.text_rec_config.MODEL.IMAGE_SIZE.W))
+                img.shape[1] / (self.text_rec_config.model.img_size.ow / self.text_rec_config.model.img_size.w))
             img = cv2.resize(img, (0, 0), fx=w_cur / w, fy=1.0, interpolation=cv2.INTER_CUBIC)
-            img = np.reshape(img, (self.text_rec_config.MODEL.IMAGE_SIZE.H, w_cur, 1))
+            img = np.reshape(img, (self.text_rec_config.model.img_size.h, w_cur, 1))
 
             img = img.astype(np.float32)
-            img = (img / 255. - self.text_rec_config.DATASET.MEAN) / self.text_rec_config.DATASET.STD
+            img = (img / 255. - self.text_rec_config.preprocessing.mean) / self.text_rec_config.preprocessing.std
             img = img.transpose([2, 0, 1])
 
             img = torch.from_numpy(img)
@@ -70,55 +70,20 @@ class DLTextRecognizer(OCRRoot):
             else:
                 result["name_2"] = self.sanitize(name)
                 result["score_2"] = score.lower().strip()
+
+        result["bbox"] = score_board.bbox.tolist()
+        result["frame_count"] = score_board.frame_count
+        if "serving_player" not in result.keys():
+            result["serving_player"] = "unknown"
+        result = Result(score_board=score_board,
+                        name_1=result["name_1"],
+                        name_2=result["name_2"],
+                        serving_player=result["serving_player"],
+                        score_1=result["score_1"],
+                        score_2=result["score_2"])
+
+        self.draw(score_board, result)
         if str(score_board.frame_count) in self.gt_ann.keys():
-            result["bbox"] = score_board.bbox.tolist()
-            result["frame_count"] = score_board.frame_count
-            if "serving_player" not in result.keys():
-                result["serving_player"] = "unknown"
-            result = Result(score_board=score_board,
-                            name_1=result["name_1"],
-                            name_2=result["name_2"],
-                            serving_player=result["serving_player"],
-                            score_1=result["score_1"],
-                          score_2=result["score_2"])
-            cv2.putText(
-                img=score_board.raw_img,
-                text="name1: " + result.name_1 + " " + result.name_2,
-                org=(200, 200),
-                fontFace=cv2.FONT_HERSHEY_DUPLEX,
-                fontScale=3.0,
-                color=(125, 246, 55),
-                thickness=3
-            )
-            cv2.putText(
-                img=score_board.raw_img,
-                text="serving: " + result.serving_player,
-                org=(200, 350),
-                fontFace=cv2.FONT_HERSHEY_DUPLEX,
-                fontScale=3.0,
-                color=(125, 246, 55),
-                thickness=3
-            )
-            cv2.putText(
-                img=score_board.raw_img,
-                text="score_1: " + result.score_1 + " score_2 " + result.score_2,
-                org=(200, 500),
-                fontFace=cv2.FONT_HERSHEY_DUPLEX,
-                fontScale=3.0,
-                color=(125, 246, 55),
-                thickness=3
-            )
-            cv2.putText(
-                img=score_board.raw_img,
-                text="frame_count " + score_board.frame_count,
-                org=(200, 600),
-                fontFace=cv2.FONT_HERSHEY_DUPLEX,
-                fontScale=3.0,
-                color=(125, 246, 55),
-                thickness=3
-            )
-
-
             self.csv_logger.store(result)
 
     def run(self, score_board: ScoreBoard):

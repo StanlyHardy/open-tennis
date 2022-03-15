@@ -14,6 +14,8 @@ from src.utils.renderer import Renderer
 ROOT_DIR = Path(__file__).parents[1]
 ASSETS_DIR = os.path.join(ROOT_DIR, "assets/configs")
 CONFIGURATION_FILE = os.path.join(ASSETS_DIR, "app_config.yaml")
+TEXT_REC_CONFIG_FILE = os.path.join(ASSETS_DIR, "text_rec_config.yaml")
+DETECTOR_CONFIG_FILE = os.path.join(ASSETS_DIR, "detector_config.yaml")
 
 
 class AppContext(object):
@@ -24,12 +26,18 @@ class AppContext(object):
     csv_logger = CSV_Logger()
     total_frame_count = 0
     render = Renderer(streamer_profile["should_draw"])
-    with open("assets/configs/text_rec_config.yaml", 'r') as f:
+
+    with open(TEXT_REC_CONFIG_FILE, 'r') as f:
         text_rec_config = yaml.load(f, Loader=yaml.FullLoader)
         text_rec_config = edict(text_rec_config)
 
-    text_rec_config.DATASET.ALPHABETS = alphabets.alphabet
-    text_rec_config.MODEL.NUM_CLASSES = len(text_rec_config.DATASET.ALPHABETS)
+    with open(DETECTOR_CONFIG_FILE, 'r') as f:
+        detector_config = yaml.load(f, Loader=yaml.FullLoader)
+        detector_config = edict(detector_config)
+
+
+    text_rec_config.preprocessing.ALPHABETS = alphabets.alphabet
+    text_rec_config.model.num_classes = len(text_rec_config.preprocessing.ALPHABETS)
 
     sess_options = rt.SessionOptions()
 

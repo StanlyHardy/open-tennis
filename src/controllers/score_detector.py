@@ -46,11 +46,12 @@ class ScoreDetector(AppContext):
                 cropped_image = image_src[y1:y2, x1:x2]
                 self.text_recognizer.run(ScoreBoard(cropped_image, frame_count, box, image_src))
 
-                cv2.rectangle(image_src, (x1, y1), (x2, y2), (0, 255, 0), thickness=max(
-                    int((w + h) / 600), 1), lineType=cv2.LINE_AA)
-
-                cv2.putText(image_src, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3, [255, 255, 255],
-                            thickness=1, lineType=cv2.LINE_AA)
+                self.render.rect(
+                    image_src, (x1, y1), (x2, y2),
+                    thickness=max(
+                        int((w + h) / 600), 1)
+                )
+                self.render.text(image_src, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3)
 
     def detect(self, data: InputFrame):
         pil_img = Image.fromarray(
@@ -61,7 +62,9 @@ class ScoreDetector(AppContext):
         batch_detections = torch.from_numpy(np.array(outputs[0]))
 
         batch_detections = non_max_suppression(
-            batch_detections, conf_thres=0.4, iou_thres=0.5, agnostic=False)
+            batch_detections, conf_thres= self.detector_config["model"]["conf_thresh"],
+            iou_thres= self.detector_config["model"]["iou_thres"], agnostic=False)
         self.result = batch_detections[0]
 
-        self.post_processing(batch_detections[0], data.image, 0.6, data.frame_count)
+        self.post_processing(batch_detections[0], data.image, self.detector_config["model"]["conf_thresh"],
+                             data.frame_count)
