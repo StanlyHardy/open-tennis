@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 
 class Renderer(object):
@@ -6,10 +7,10 @@ class Renderer(object):
     Renderer is responsible to respond for every draw calls that it receives about the player data.
     """
 
-    def __init__(self, should_draw):
-        self.should_draw = should_draw
+    def __init__(self, app_profile):
+        self.should_draw = app_profile["streamer"]["should_draw"]
 
-    def draw_canvas(self, drawable_frame, output_vis, alpha=0.4):
+    def draw_canvas(self, drawable_frame: np.ndarray, output_vis: np.ndarray, alpha=0.4):
         """
         Creates a drawable to write player data.
         :param drawable_frame: drawable that will be used as the canvas
@@ -26,7 +27,8 @@ class Renderer(object):
                             0, output_vis)
         return output_vis
 
-    def text(self, image, data, coordinate, font_face=cv2.LINE_AA, fontscale=1, font_color=(125, 246, 55), thickness=2):
+    def text(self, image: np.ndarray, data: str, coordinate: tuple, font_face=cv2.LINE_AA, fontscale=1,
+             font_color=(125, 246, 55), thickness=2):
         """
         Input text data.
         :param image: image on which the data needs to be written
@@ -50,7 +52,7 @@ class Renderer(object):
             )
         return image
 
-    def rect(self, image, pt1, pt2, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA):
+    def rect(self, image: np.ndarray, pt1: tuple, pt2: tuple, color=(0, 255, 0), thickness=2, lineType=cv2.LINE_AA):
         """
         Draws a rectangle at specified position
         :param image: image in which the rectangle needs to be drawn

@@ -1,6 +1,7 @@
 import re
 
 import cv2
+import numpy as np
 
 import tesserocr
 
@@ -22,7 +23,7 @@ class TesserTextRecognizer(OCRCore):
         self.api = tesserocr.PyTessBaseAPI()
         self.symbol_pattern = re.compile("[A-Za-z0-9]+")
 
-    def _preprocess(self, patch):
+    def _preprocess(self, patch : np.ndarray):
         """
         Preprocess the input patch
         :param patch:
@@ -54,7 +55,7 @@ class TesserTextRecognizer(OCRCore):
         patches = self._divide_image(thresh)
         return patches
 
-    def _analyze(self, patches, score_board: ScoreBoard):
+    def _analyze(self, patches : dict, score_board: ScoreBoard):
         """
         Recognize the text in the cropped score image
         :param patches: patches that were cut previously

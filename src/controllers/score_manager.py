@@ -14,7 +14,7 @@ class ScoreManager(AppContext):
     """
 
     def __init__(self):
-        if self.streamer_profile["evaluation"]:
+        if self.app_profile["streamer"]["evaluation"]:
             self.session = ImageStreamer()
         else:
             self.session = VideoStreamer()

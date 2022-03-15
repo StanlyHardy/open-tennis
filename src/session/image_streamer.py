@@ -14,11 +14,11 @@ class ImageStreamer(SessionContext):
         Video Playback session handler for evaluation
         """
         super().__init__()
-        self.img_paths = glob(self.streamer_profile["img_path"] + "/*.jpg")
-        print("Input Video Path : ", self.streamer_profile["img_path"])
+        self.img_paths = glob(self.app_profile["streamer"]["img_path"] + "/*.jpg")
+        print("Input Video Path : ", self.app_profile["streamer"]["img_path"])
 
         self.img_count = 0
-        self.img_paths = sorted(self.img_paths, key=lambda x: str(os.path.splitext(x)[0]))
+        self.img_paths = sorted(self.img_paths, key=lambda x: str(os.path.splitext(x)[0]))[:100]
         self.total_frame_count = len(self.img_paths)
         self.p_bar = tqdm(range(len(self.img_paths)), desc="Streaming Images...")
 

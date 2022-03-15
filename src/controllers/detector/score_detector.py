@@ -4,7 +4,7 @@ import onnxruntime as rt
 import torch
 from PIL import Image
 
-from src.controllers.ModelManager import ModelManager
+from src.controllers.model_manager import ModelManager
 from src.controllers.detector.detector_utils import letterbox_image, non_max_suppression, scale_coords
 from src.utils.daos import InputFrame, ScoreBoard
 
@@ -25,7 +25,7 @@ class ScoreDetector(ModelManager):
         self._model_check()
 
     def _model_check(self):
-        if self.streamer_profile["debug"]:
+        if self.app_profile["streamer"]["debug"]:
             print("Input Layer: ", self.input_name)
             print("Output Layer: ", self.detector_session.get_outputs()[0].name)
             print("Model Input Shape: ", (self.in_w,self.in_h))

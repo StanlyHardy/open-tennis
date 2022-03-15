@@ -9,8 +9,8 @@ class VideoStreamer(SessionContext):
         Video Playback session handler
         """
         super().__init__()
-        self.video = cv2.VideoCapture(self.streamer_profile["video_path"])
-        print("Input Video Path : ", self.streamer_profile["video_path"])
+        self.video = cv2.VideoCapture(self.app_profile["streamer"]["video_path"])
+        print("Input Video Path : ", self.app_profile["streamer"]["video_path"])
 
         self.fw = int(self.video.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.fh = int(self.video.get(cv2.CAP_PROP_FRAME_HEIGHT))

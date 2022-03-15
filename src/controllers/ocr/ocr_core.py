@@ -1,6 +1,7 @@
 import difflib
 
 import cv2
+import numpy as np
 
 from src import AppContext
 from src.utils.daos import ScoreBoard, Result
@@ -16,7 +17,7 @@ class OCRCore(AppContext):
         mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
         self.players = list(mapped_players)
 
-    def sanitize(self, name):
+    def sanitize(self, name : str):
         """
         Sanitize the predicted player name based on the closest possible match over the list of
         the existing player.
@@ -29,7 +30,7 @@ class OCRCore(AppContext):
             return matching_name[0]
         return name
 
-    def _divide_image(self, image):
+    def _divide_image(self, image : np.ndarray):
         """
         Divide the cropped scoreboard into two patches.
             1. Upper patch has the Player 1 details
@@ -56,7 +57,7 @@ class OCRCore(AppContext):
 
         return patches
 
-    def enlarge_scoreboard_images(self, patch, enlarge_ratio):
+    def enlarge_scoreboard_images(self, patch: np.ndarray, enlarge_ratio : float):
         """
         Tesseract tends to work well in images of higher dimensions and hence resize
         :param patch: patch that needs to be resized
@@ -115,7 +116,7 @@ class OCRCore(AppContext):
                         score_1=result["score_1"],
                         score_2=result["score_2"])
         self.draw(score_board, result)
-        if self.streamer_profile["evaluation"]:
+        if self.app_profile["streamer"]["evaluation"]:
             if str(score_board.frame_count) in self.gt_ann.keys():
                 self.csv_logger.store(result)
 
