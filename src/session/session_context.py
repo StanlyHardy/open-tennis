@@ -23,6 +23,6 @@ class SessionContext(AppContext):
     def is_interrupted(self):
         k = cv2.waitKey(1)
         if k == ord('q'):
-            self.csv_logger.persist()
+            self.csv_logger.persist(self.gt_ann)
             return True
         return False

@@ -9,11 +9,11 @@ from easydict import EasyDict as edict
 
 from src.controllers.ocr import alphabets, crnn
 from src.utils.csv_logger import CSV_Logger
+from src.utils.renderer import Renderer
 
 ROOT_DIR = Path(__file__).parents[1]
 ASSETS_DIR = os.path.join(ROOT_DIR, "assets/configs")
 CONFIGURATION_FILE = os.path.join(ASSETS_DIR, "app_config.yaml")
-
 
 
 class AppContext(object):
@@ -22,7 +22,8 @@ class AppContext(object):
     streamer_profile = yaml.load(stream, Loader=yaml.Loader)["streamer"]
     stream.close()
     csv_logger = CSV_Logger()
-
+    total_frame_count = 0
+    render = Renderer(streamer_profile["should_draw"])
     with open("assets/configs/text_rec_config.yaml", 'r') as f:
         text_rec_config = yaml.load(f, Loader=yaml.FullLoader)
         text_rec_config = edict(text_rec_config)

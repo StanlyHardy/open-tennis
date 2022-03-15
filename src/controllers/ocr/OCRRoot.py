@@ -13,7 +13,7 @@ class OCRRoot(AppContext):
         self.playersLines = players_file_path.read().splitlines()
         mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
         self.players = list(mapped_players)
-        self.evaluator = Evaluator()
+
 
     def sanitize(self, name):
         stripped_name = name.lower().strip()
@@ -24,7 +24,10 @@ class OCRRoot(AppContext):
 
     def divide_image(self, image):
         buf_image = image.copy()
-        h, w,c = buf_image.shape
+        if len(buf_image.shape) > 2:
+            h, w, c = buf_image.shape
+        else:
+            h, w = buf_image.shape
         start_x, start_y = (1, 1)
         end_x, end_y = (w, h // 2)
 

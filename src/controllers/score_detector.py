@@ -4,9 +4,8 @@ import torch
 from PIL import Image
 
 from src import AppContext
-from src.controllers.dl_txt_recognizer import DLTextRecognizer
-from src.controllers.tesseract_ocr import TesserTextRecognizer
-from src.utils import background_job
+from src.controllers.ocr.dl_txt_recognizer import DLTextRecognizer
+from src.controllers.ocr.tesseract_ocr import TesserTextRecognizer
 from src.utils.daos import InputFrame, ScoreBoard
 from src.utils.detector_utils import letterbox_image, non_max_suppression, scale_coords
 
@@ -14,13 +13,15 @@ from src.utils.detector_utils import letterbox_image, non_max_suppression, scale
 class ScoreDetector(AppContext):
 
     def __init__(self):
-        self.text_recognizer = TesserTextRecognizer()
+        if self.streamer_profile["ocr_engine"] == "PyTesseract":
+            print("Initializing OCR Backend : PyTesseract")
+            self.text_recognizer = TesserTextRecognizer()
+        else:
+            print("Initializing OCR Backend : CRNN")
+            self.text_recognizer = DLTextRecognizer()
 
     def preprocess_image(self, pil_image, in_size=(640, 640)):
-        """preprocesses PIL image and returns a norm np.ndarray
-        pil_image = pillow image
-        in_size: in_width, in_height
-        """
+
         in_w, in_h = in_size
         resized = letterbox_image(pil_image, (in_w, in_h))
         img_in = np.transpose(resized, (2, 0, 1)).astype(np.float32)  # HWC -> CHW
@@ -43,13 +44,14 @@ class ScoreDetector(AppContext):
             if confs[i] >= threshold:
                 x1, y1, x2, y2 = map(int, box)
                 cropped_image = image_src[y1:y2, x1:x2]
-                self.text_recognizer.run(ScoreBoard(cropped_image,frame_count,box, image_src))
+                self.text_recognizer.run(ScoreBoard(cropped_image, frame_count, box, image_src))
 
                 cv2.rectangle(image_src, (x1, y1), (x2, y2), (0, 255, 0), thickness=max(
                     int((w + h) / 600), 1), lineType=cv2.LINE_AA)
 
                 cv2.putText(image_src, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3, [255, 255, 255],
                             thickness=1, lineType=cv2.LINE_AA)
+
     def detect(self, data: InputFrame):
         pil_img = Image.fromarray(
             cv2.cvtColor(data.image, cv2.COLOR_BGR2RGB))

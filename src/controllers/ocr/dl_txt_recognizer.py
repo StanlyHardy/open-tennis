@@ -1,16 +1,11 @@
-import difflib
-
 import cv2
 import numpy as np
 import torch
 from torch.autograd import Variable
 
-from src import AppContext
-from src.controllers.OCRRoot import OCRRoot
-from src.controllers.evaluator import Evaluator
+from src.controllers.ocr.OCRRoot import OCRRoot
 from src.controllers.ocr import crnn
 from src.utils import ocr_utils
-from src.utils.csv_logger import CSV_Logger
 from src.utils.daos import ScoreBoard, Result
 
 
@@ -30,10 +25,8 @@ class DLTextRecognizer(OCRRoot):
         self.converter = ocr_utils.strLabelConverter(self.text_rec_config.DATASET.ALPHABETS)
 
     def recognition(self, patches, score_board: ScoreBoard):
-
         result = {}
         for k, patch in patches.items():
-            patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
 
             h, w = patch.shape
 
@@ -73,10 +66,10 @@ class DLTextRecognizer(OCRRoot):
 
             if k == "upper_patch":
                 result["name_1"] = self.sanitize(name)
-                result["score_1"] = score
+                result["score_1"] = score.lower().strip()
             else:
                 result["name_2"] = self.sanitize(name)
-                result["score_2"] = score
+                result["score_2"] = score.lower().strip()
         if str(score_board.frame_count) in self.gt_ann.keys():
             result["bbox"] = score_board.bbox.tolist()
             result["frame_count"] = score_board.frame_count
@@ -87,7 +80,7 @@ class DLTextRecognizer(OCRRoot):
                             name_2=result["name_2"],
                             serving_player=result["serving_player"],
                             score_1=result["score_1"],
-                            score_2=result["score_2"])
+                          score_2=result["score_2"])
             cv2.putText(
                 img=score_board.raw_img,
                 text="name1: " + result.name_1 + " " + result.name_2,
@@ -124,11 +117,11 @@ class DLTextRecognizer(OCRRoot):
                 color=(125, 246, 55),
                 thickness=3
             )
-            cv2.imwrite("assets/result/" + str(score_board.frame_count) + ".jpg", score_board.raw_img)
 
-            self.evaluator.trigger(result)
+
             self.csv_logger.store(result)
 
     def run(self, score_board: ScoreBoard):
-        patches = self.divide_image(score_board.image.copy())
+        score_board_img = cv2.cvtColor(score_board.image.copy(), cv2.COLOR_BGR2GRAY)
+        patches = self.divide_image(score_board_img)
         self.recognition(patches, score_board)
