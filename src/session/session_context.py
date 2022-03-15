@@ -21,6 +21,8 @@ class SessionContext(AppContext):
         return self.overlayframe
 
     def is_interrupted(self):
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        k = cv2.waitKey(1)
+        if k == ord('q'):
+            self.csv_logger.persist()
             return True
         return False

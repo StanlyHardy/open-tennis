@@ -6,6 +6,7 @@ import torch
 from torch.autograd import Variable
 
 from src import AppContext
+from src.controllers.OCRRoot import OCRRoot
 from src.controllers.evaluator import Evaluator
 from src.controllers.ocr import crnn
 from src.utils import ocr_utils
@@ -13,8 +14,9 @@ from src.utils.csv_logger import CSV_Logger
 from src.utils.daos import ScoreBoard, Result
 
 
-class DLTextRecognizer(AppContext):
+class DLTextRecognizer(OCRRoot):
     def __init__(self):
+        super().__init__()
         self.device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
         self.text_rec_model = crnn.get_crnn(self.text_rec_config).to(self.device)
@@ -26,33 +28,12 @@ class DLTextRecognizer(AppContext):
             self.text_rec_model.load_state_dict(checkpoint)
         self.text_rec_model.eval()
         self.converter = ocr_utils.strLabelConverter(self.text_rec_config.DATASET.ALPHABETS)
-        self.evaluator = Evaluator()
-
-        players_file_path = open('assets/data/gt/players.csv', 'r')
-        self.playersLines = players_file_path.read().splitlines()
-        mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
-        self.players = list(mapped_players)
-
-    def divide_image(self, image):
-        h, w = image.shape
-        start_x, start_y = (1, 1)
-        end_x, end_y = (w, h // 2)
-
-        lower_startx, lower_start_y = (0, h // 2)
-        lower_end_x, lower_end_y = (w, h)
-
-        upper_part = image[start_y:end_y + 6, start_x:end_x]
-
-        lower_part = image[lower_start_y:lower_end_y, lower_startx:lower_end_x]
-
-        patches = {"upper_patch": upper_part, "lower_patch": lower_part}
-
-        return patches
 
     def recognition(self, patches, score_board: ScoreBoard):
 
         result = {}
         for k, patch in patches.items():
+            patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
 
             h, w = patch.shape
 
@@ -88,7 +69,7 @@ class DLTextRecognizer(AppContext):
                 if k == "upper_patch":
                     result["serving_player"] = "name_1"
                 else:
-                    result["serving_player"] = "name_1"
+                    result["serving_player"] = "name_2"
 
             if k == "upper_patch":
                 result["name_1"] = self.sanitize(name)
@@ -101,24 +82,53 @@ class DLTextRecognizer(AppContext):
             result["frame_count"] = score_board.frame_count
             if "serving_player" not in result.keys():
                 result["serving_player"] = "unknown"
-
-            result= Result(score_board,
-                           name_1=result["name_1"],
-                           name_2=result["name_1"],
-                           serving_player=result["serving_player"],
-                           score_1=result["score_1"],
-                           score_2=result["score_2"])
+            result = Result(score_board=score_board,
+                            name_1=result["name_1"],
+                            name_2=result["name_2"],
+                            serving_player=result["serving_player"],
+                            score_1=result["score_1"],
+                            score_2=result["score_2"])
+            cv2.putText(
+                img=score_board.raw_img,
+                text="name1: " + result.name_1 + " " + result.name_2,
+                org=(200, 200),
+                fontFace=cv2.FONT_HERSHEY_DUPLEX,
+                fontScale=3.0,
+                color=(125, 246, 55),
+                thickness=3
+            )
+            cv2.putText(
+                img=score_board.raw_img,
+                text="serving: " + result.serving_player,
+                org=(200, 350),
+                fontFace=cv2.FONT_HERSHEY_DUPLEX,
+                fontScale=3.0,
+                color=(125, 246, 55),
+                thickness=3
+            )
+            cv2.putText(
+                img=score_board.raw_img,
+                text="score_1: " + result.score_1 + " score_2 " + result.score_2,
+                org=(200, 500),
+                fontFace=cv2.FONT_HERSHEY_DUPLEX,
+                fontScale=3.0,
+                color=(125, 246, 55),
+                thickness=3
+            )
+            cv2.putText(
+                img=score_board.raw_img,
+                text="frame_count " + score_board.frame_count,
+                org=(200, 600),
+                fontFace=cv2.FONT_HERSHEY_DUPLEX,
+                fontScale=3.0,
+                color=(125, 246, 55),
+                thickness=3
+            )
+            cv2.imwrite("assets/result/" + str(score_board.frame_count) + ".jpg", score_board.raw_img)
 
             self.evaluator.trigger(result)
             self.csv_logger.store(result)
 
-    def sanitize(self, name):
-        stripped_name = name.lower().strip()
-        matching_name = difflib.get_close_matches(stripped_name, self.players)
-        if len(matching_name) > 0:
-            return matching_name[0]
-        return name
-
     def run(self, score_board: ScoreBoard):
-        patches = self.divide_image(score_board.image)
+        patches = self.divide_image(score_board.image.copy())
         self.recognition(patches, score_board)

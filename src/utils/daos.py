@@ -19,11 +19,12 @@ class ScoreBoard:
     image: np.ndarray
     frame_count: int
     bbox: np.ndarray
+    raw_img : np.ndarray
 
 
 @dataclass
 class Result:
-    scoreboard: ScoreBoard
+    score_board: ScoreBoard
     name_1: str
     name_2: str
     serving_player: str
