@@ -1,0 +1,12 @@
+preprocessing:
+  std: 0.193
+  mean: 0.588
+  alphabets: ''
+
+model:
+  img_size:
+    ow: 280
+    h: 32
+    w: 160
+  num_classes: 0
+  num_hidden: 256

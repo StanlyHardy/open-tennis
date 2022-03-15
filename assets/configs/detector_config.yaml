@@ -1,0 +1,6 @@
+model:
+  execution_env: "cuda" # Supports CUDA, CPU , TensorRT (on compatible hardware)
+  conf_thresh : 0.6
+  iou_thres : 0.5
+  warm_up : 25
+  class_labels : ["scoreboard"]

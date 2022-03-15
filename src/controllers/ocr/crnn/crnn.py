@@ -23,6 +23,7 @@ class BidirectionalLSTM(nn.Module):
 
 class CRNN(nn.Module):
     def __init__(self, imgH, nc, nclass, nh, n_rnn=2, leakyRelu=False):
+        print(imgH,nc,nclass,nh)
         super(CRNN, self).__init__()
         assert imgH % 16 == 0, 'imgH has to be a multiple of 16'
 
@@ -89,6 +90,7 @@ def weights_init(m):
 
 
 def get_crnn(config):
+    print(config.model.img_size.h,1, config.model.num_classes + 1 , config.model.num_hidden)
     model = CRNN(config.model.img_size.h, 1,
                  config.model.num_classes + 1,
                  config.model.num_hidden)

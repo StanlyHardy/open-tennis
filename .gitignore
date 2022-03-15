@@ -3,4 +3,6 @@ _pycache__/.
 !**/__pycache__/
 __pycache__/
 *.pyc
-assets/
+assets/models
+assets/data/results
+assets/data/gt

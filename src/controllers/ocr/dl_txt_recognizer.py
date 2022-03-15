@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from src.controllers.ocr.ocr_core import OCRCore
 from src.controllers.ocr.crnn import crnn
 from src.controllers.ocr.crnn import ocr_utils
-from src.utils.daos import ScoreBoard, Result
+from src.utils.daos import ScoreBoard
 
 
 class DLTextRecognizer(OCRCore):
@@ -20,7 +20,7 @@ class DLTextRecognizer(OCRCore):
 
         self.text_rec_model = crnn.get_crnn(self.text_rec_config).to(self.device)
 
-        checkpoint = torch.load(self.streamer_profile["text_rec_model"])
+        checkpoint = torch.load("assets/models/text_recog.pth")
         if 'state_dict' in checkpoint.keys():
             self.text_rec_model.load_state_dict(checkpoint['state_dict'])
         else:
