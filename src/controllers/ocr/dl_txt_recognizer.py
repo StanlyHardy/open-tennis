@@ -26,7 +26,7 @@ class DLTextRecognizer(OCRCore):
         else:
             self.text_rec_model.load_state_dict(checkpoint)
         self.text_rec_model.eval()
-        self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.ALPHABETS)
+        self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.alphabets)
 
     def _preprocess(self, patch : np.ndarray):
         """

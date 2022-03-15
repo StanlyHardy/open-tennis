@@ -25,7 +25,8 @@ class AppContext(object):
     detector_config = AppUtils.load_config(app_profile["models"]["detector_config"])
     text_rec_config = AppUtils.load_config(app_profile["models"]["text_rec_config"])
     playersLines = AppUtils.load_players(PLAYERS_FILE_PATH)
-
+    text_rec_config.preprocessing.alphabets = alphabets.alphabet
+    text_rec_config.model.num_classes = len(text_rec_config.preprocessing.alphabets)
     render = Renderer(app_profile)
     csv_logger = ResultCoordinator()
 
