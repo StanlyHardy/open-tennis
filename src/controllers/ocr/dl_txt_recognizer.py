@@ -3,15 +3,16 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
-from src.controllers.ocr.OCRRoot import OCRRoot
-from src.controllers.ocr import crnn
-from src.utils import ocr_utils
+from src.controllers.ocr.ocr_core import OCRCore
+from src.controllers.ocr.crnn import crnn
+from src.controllers.ocr.crnn import ocr_utils
 from src.utils.daos import ScoreBoard, Result
 
 
-class DLTextRecognizer(OCRRoot):
+class DLTextRecognizer(OCRCore):
     def __init__(self):
         super().__init__()
+
         self.device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
 
         self.text_rec_model = crnn.get_crnn(self.text_rec_config).to(self.device)
@@ -24,29 +25,32 @@ class DLTextRecognizer(OCRRoot):
         self.text_rec_model.eval()
         self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.ALPHABETS)
 
+    def preprocess(self, patch):
+        h, w = patch.shape
+        img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.model.img_size.h / h,
+                         fy=self.text_rec_config.model.img_size.h / h,
+                         interpolation=cv2.INTER_CUBIC)
+        h, w = img.shape
+        w_cur = int(
+            img.shape[1] / (self.text_rec_config.model.img_size.ow / self.text_rec_config.model.img_size.w))
+        img = cv2.resize(img, (0, 0), fx=w_cur / w, fy=1.0, interpolation=cv2.INTER_CUBIC)
+        img = np.reshape(img, (self.text_rec_config.model.img_size.h, w_cur, 1))
+
+        img = img.astype(np.float32)
+        img = (img / 255. - self.text_rec_config.preprocessing.mean) / self.text_rec_config.preprocessing.std
+        img = img.transpose([2, 0, 1])
+
+        img = torch.from_numpy(img)
+
+        img = img.to(self.device)
+        img = img.view(1, *img.size())
+        return img
+
     def recognition(self, patches, score_board: ScoreBoard):
         result = {}
         for k, patch in patches.items():
 
-            h, w = patch.shape
-
-            img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.model.img_size.h / h,
-                             fy=self.text_rec_config.model.img_size.h / h,
-                             interpolation=cv2.INTER_CUBIC)
-            h, w = img.shape
-            w_cur = int(
-                img.shape[1] / (self.text_rec_config.model.img_size.ow / self.text_rec_config.model.img_size.w))
-            img = cv2.resize(img, (0, 0), fx=w_cur / w, fy=1.0, interpolation=cv2.INTER_CUBIC)
-            img = np.reshape(img, (self.text_rec_config.model.img_size.h, w_cur, 1))
-
-            img = img.astype(np.float32)
-            img = (img / 255. - self.text_rec_config.preprocessing.mean) / self.text_rec_config.preprocessing.std
-            img = img.transpose([2, 0, 1])
-
-            img = torch.from_numpy(img)
-
-            img = img.to(self.device)
-            img = img.view(1, *img.size())
+            img = self.preprocess(patch)
             preds = self.text_rec_model(img)
             _, preds = preds.max(2)
             preds = preds.transpose(1, 0).contiguous().view(-1)

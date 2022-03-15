@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class BidirectionalLSTM(nn.Module):
     # Inputs hidden units Out
     def __init__(self, nIn, nHidden, nOut):
@@ -18,6 +19,7 @@ class BidirectionalLSTM(nn.Module):
         output = output.view(T, b, -1)
 
         return output
+
 
 class CRNN(nn.Module):
     def __init__(self, imgH, nc, nclass, nh, n_rnn=2, leakyRelu=False):
@@ -68,13 +70,14 @@ class CRNN(nn.Module):
         # conv features
         conv = self.cnn(input)
         b, c, h, w = conv.size()
-        #print(conv.size())
+        # print(conv.size())
         assert h == 1, "the height of conv must be 1"
-        conv = conv.squeeze(2) # b *512 * width
+        conv = conv.squeeze(2)  # b *512 * width
         conv = conv.permute(2, 0, 1)  # [w, b, c]
         output = F.log_softmax(self.rnn(conv), dim=2)
 
         return output
+
 
 def weights_init(m):
     classname = m.__class__.__name__
@@ -84,8 +87,8 @@ def weights_init(m):
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
 
-def get_crnn(config):
 
+def get_crnn(config):
     model = CRNN(config.model.img_size.h, 1,
                  config.model.num_classes + 1,
                  config.model.num_hidden)

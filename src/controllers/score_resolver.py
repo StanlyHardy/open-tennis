@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 import cv2
 
 from src import AppContext
@@ -18,10 +17,8 @@ class ScoreResolver(AppContext):
         self.score_detector = ScoreDetector()
 
     def run(self):
-        with ThreadPoolExecutor() as executor:
-            while not self.camera.is_interrupted():
-                self.camera.update_frames()
-                detector_frame = self.camera.get_detection_frame()
-                self.score_detector.detect(InputFrame(detector_frame, self.camera.get_frame_count()))
-                # executor.submit(self.score_detector.detect,InputFrame(detector_frame, self.camera.get_frame_count()) )
-                cv2.imshow("World", detector_frame)
+        while not self.camera.is_interrupted():
+            self.camera.update_frames()
+            detector_frame = self.camera.get_detection_frame()
+            self.score_detector.detect(InputFrame(detector_frame, self.camera.get_frame_count()))
+            cv2.imshow("World", detector_frame)

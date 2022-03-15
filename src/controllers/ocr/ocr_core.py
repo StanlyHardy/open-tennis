@@ -6,14 +6,11 @@ from src import AppContext
 from src.utils.daos import ScoreBoard, Result
 
 
-class OCRRoot(AppContext):
+class OCRCore(AppContext):
 
     def __init__(self):
-        players_file_path = open('assets/data/gt/players.csv', 'r')
-        self.playersLines = players_file_path.read().splitlines()
         mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
         self.players = list(mapped_players)
-
 
     def sanitize(self, name):
         stripped_name = name.lower().strip()

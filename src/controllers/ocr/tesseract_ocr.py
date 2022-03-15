@@ -4,12 +4,12 @@ import cv2
 
 import tesserocr
 
-from src.controllers.ocr.OCRRoot import OCRRoot
+from src.controllers.ocr.ocr_core import OCRCore
 from src.utils.daos import ScoreBoard, Result
 from PIL import Image
 
 
-class TesserTextRecognizer(OCRRoot):
+class TesserTextRecognizer(OCRCore):
     def __init__(self):
         super().__init__()
         self.api = tesserocr.PyTessBaseAPI()

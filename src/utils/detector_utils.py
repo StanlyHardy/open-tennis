@@ -1,4 +1,3 @@
-import cv2
 import time
 import torch
 import torchvision
