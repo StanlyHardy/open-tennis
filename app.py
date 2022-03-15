@@ -1,8 +1,8 @@
-from src.controllers.score_resolver import ScoreResolver
+from src.controllers.score_manager import ScoreManager
 
 
 def main():
-    ScoreResolver().run()
+    ScoreManager().run()
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from src import AppContext
 from src.controllers.ocr.dl_txt_recognizer import DLTextRecognizer
 from src.controllers.ocr.tesseract_ocr import TesserTextRecognizer
 from src.utils.daos import InputFrame, ScoreBoard
-from src.utils.detector_utils import letterbox_image, non_max_suppression, scale_coords
+from src.controllers.detector.detector_utils import letterbox_image, non_max_suppression, scale_coords
 
 
 class ScoreDetector(AppContext):
@@ -15,7 +15,7 @@ class ScoreDetector(AppContext):
     Detect the location of the scoreboard
     """
     def __init__(self):
-        if self.streamer_profile["ocr_engine"] == "PyTesseract":
+        if self.app_profile["models"]["ocr_engine"] == "PyTesseract":
             print("Initializing OCR Backend : PyTesseract")
             self.text_recognizer = TesserTextRecognizer()
         else:

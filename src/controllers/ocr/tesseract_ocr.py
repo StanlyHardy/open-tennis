@@ -18,7 +18,7 @@ class TesserTextRecognizer(OCRCore):
         self.api = tesserocr.PyTessBaseAPI()
         self.symbol_pattern = re.compile("[A-Za-z0-9]+")
 
-    def get_preprocessed_image(self, patch):
+    def _preprocess(self, patch):
         """
         Preprocess the input patch
         :param patch:
@@ -47,10 +47,10 @@ class TesserTextRecognizer(OCRCore):
             sub_crop = ~sub_crop
             # paste the image back to the original cropped image.
             thresh[res[1]:res[3], res[0]:res[2]] = sub_crop
-        patches = self.divide_image(thresh)
+        patches = self._divide_image(thresh)
         return patches
 
-    def analyze(self, patches, score_board: ScoreBoard):
+    def _analyze(self, patches, score_board: ScoreBoard):
         """
         Recognize the text in the cropped score image
         :param patches: patches that were cut previously
@@ -102,5 +102,5 @@ class TesserTextRecognizer(OCRCore):
         """
         :param score_board: scoreboard that contains it's meta data
         """
-        patches = self.get_preprocessed_image(score_board.image)
-        self.analyze(patches, score_board)
+        patches = self._preprocess(score_board.image)
+        self._analyze(patches, score_board)

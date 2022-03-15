@@ -8,7 +8,7 @@ from easydict import EasyDict as edict
 
 from src.controllers.ocr import crnn
 from src.controllers.ocr.crnn import alphabets
-from src.utils.csv_logger import CSV_Logger
+from src.utils.resultcoordinator import ResultCoordinator
 from src.utils.renderer import Renderer
 
 ROOT_DIR = Path(__file__).parents[1]
@@ -22,9 +22,10 @@ GT_FILE_PATH = os.path.join(ROOT_DIR, "assets/data/gt/groundtruth.json")
 
 class AppContext(object):
     stream = open(CONFIGURATION_FILE, 'r')
-    streamer_profile = yaml.load(stream, Loader=yaml.Loader)["streamer"]
+    app_profile = yaml.load(stream, Loader=yaml.Loader)
+    streamer_profile = app_profile["streamer"]
     stream.close()
-    csv_logger = CSV_Logger()
+    csv_logger = ResultCoordinator()
     total_frame_count = 0
     render = Renderer(streamer_profile["should_draw"])
 
@@ -42,7 +43,7 @@ class AppContext(object):
     playersLines = players_file_path.read().splitlines()
     sess_options = rt.SessionOptions()
 
-    session = rt.InferenceSession(streamer_profile["score_det_model"],
+    session = rt.InferenceSession(app_profile["models"]["score_det_model"],
                                   providers=["CUDAExecutionProvider"],
                                   sess_options=sess_options)
 

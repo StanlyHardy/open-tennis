@@ -29,7 +29,7 @@ class OCRCore(AppContext):
             return matching_name[0]
         return name
 
-    def divide_image(self, image):
+    def _divide_image(self, image):
         """
         Divide the cropped scoreboard into two patches.
             1. Upper patch has the Player 1 details
@@ -74,10 +74,10 @@ class OCRCore(AppContext):
         :param result: Processed result
         """
         score_board.raw_img = \
-            self.render.draw_boundary(score_board.raw_img.copy(), score_board.raw_img)
+            self.render.draw_canvas(score_board.raw_img.copy(), score_board.raw_img)
 
         score_board.raw_img = \
-            self.render.draw_boundary(score_board.raw_img.copy(), score_board.raw_img)
+            self.render.draw_canvas(score_board.raw_img.copy(), score_board.raw_img)
 
         self.render.text(score_board.raw_img, "Player 1: {}".format(result.name_1.title()),
                          coordinate=(870, 940))
@@ -119,7 +119,7 @@ class OCRCore(AppContext):
             if str(score_board.frame_count) in self.gt_ann.keys():
                 self.csv_logger.store(result)
 
-    def recognize(self):
+    def recognize(self, score_board: ScoreBoard):
         """
         Implementation overriden by the Tesseract or CRNN based recognizer
         :return:

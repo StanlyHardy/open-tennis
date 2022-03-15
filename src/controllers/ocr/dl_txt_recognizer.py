@@ -28,7 +28,7 @@ class DLTextRecognizer(OCRCore):
         self.text_rec_model.eval()
         self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.ALPHABETS)
 
-    def preprocess(self, patch):
+    def _preprocess(self, patch):
         """
         Preprocess the input image patch.
         :param patch: patch that needs to be preprocessed.
@@ -54,7 +54,7 @@ class DLTextRecognizer(OCRCore):
         img = img.view(1, *img.size())
         return img
 
-    def analyze(self, patches, score_board: ScoreBoard):
+    def _analyze(self, patches, score_board: ScoreBoard):
         """
         Analyze the input patch for the occurrence of the scoreboard
         :param patches: patches that were cut previously
@@ -63,7 +63,7 @@ class DLTextRecognizer(OCRCore):
         result = {}
         for k, patch in patches.items():
 
-            img = self.preprocess(patch)
+            img = self._preprocess(patch)
             preds = self.text_rec_model(img)
             _, preds = preds.max(2)
             preds = preds.transpose(1, 0).contiguous().view(-1)
@@ -96,5 +96,5 @@ class DLTextRecognizer(OCRCore):
         :param score_board: Scoreboard that has got the player data.
         """
         score_board_img = cv2.cvtColor(score_board.image.copy(), cv2.COLOR_BGR2GRAY)
-        patches = self.divide_image(score_board_img)
-        self.analyze(patches, score_board)
+        patches = self._divide_image(score_board_img)
+        self._analyze(patches, score_board)

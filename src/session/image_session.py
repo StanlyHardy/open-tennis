@@ -13,6 +13,9 @@ from src.session.session_context import SessionContext
 class ImageStreamer(SessionContext):
 
     def __init__(self):
+        """
+        Video Playback session handler for evaluation
+        """
         super().__init__()
         PATH = '/home/hardy/Workspace/Python/SportRadar/AnnotationCreator/assets/dataset/split/test/images'
         self.img_paths = glob(PATH + "/*.jpg")
@@ -21,7 +24,10 @@ class ImageStreamer(SessionContext):
         self.total_frame_count = len(self.img_paths)
         self.p_bar = tqdm(range(len(self.img_paths)),desc="Streaming Images...")
 
-    def update_frames(self):
+    def update(self):
+        """
+        Retrieve the frame from the disk and update the session
+        """
         if self.img_count == self.total_frame_count:
             self.csv_logger.persist(self.gt_ann, self.total_frame_count)
 
@@ -33,10 +39,14 @@ class ImageStreamer(SessionContext):
         file_path = self.img_paths[self.img_count]
         self.frame_count = os.path.basename(file_path).split(".")[0]
         frame = cv2.imread(file_path)
-        self.set_detection_frame(frame)
+        self._set_detection_frame(frame)
         self.img_count += 1
 
     def get_frame_count(self):
+        """
+        Get the current framecount
+        :return:
+        """
         return self.frame_count
 
     def __del__(self):
