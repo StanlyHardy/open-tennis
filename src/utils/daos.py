@@ -32,4 +32,7 @@ class Result:
     score_2 : str
 
 
-
+@dataclass
+class Patches:
+    bottom : np.ndarray
+    top : np.ndarray

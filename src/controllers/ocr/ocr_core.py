@@ -9,10 +9,20 @@ from src.utils.daos import ScoreBoard, Result
 class OCRCore(AppContext):
 
     def __init__(self):
+        """
+        Core OCR class that handles significant common functionalities shared by CRNN
+        as well as the TesserOCR based recognizer.
+        """
         mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
         self.players = list(mapped_players)
 
     def sanitize(self, name):
+        """
+        Sanitize the predicted player name based on the closest possible match over the list of
+        the existing player.
+        :param name: name of the player
+        :return: matched player name
+        """
         stripped_name = name.lower().strip()
         matching_name = difflib.get_close_matches(stripped_name, self.players)
         if len(matching_name) > 0:
@@ -20,6 +30,13 @@ class OCRCore(AppContext):
         return name
 
     def divide_image(self, image):
+        """
+        Divide the cropped scoreboard into two patches.
+            1. Upper patch has the Player 1 details
+            2. Lower patch has the Player 2 details
+        :param image: cropped image of the score board
+        :return: patches that are embedded in a dictionary.
+        """
         buf_image = image.copy()
         if len(buf_image.shape) > 2:
             h, w, c = buf_image.shape
@@ -40,11 +57,22 @@ class OCRCore(AppContext):
         return patches
 
     def enlarge_scoreboard_images(self, patch, enlarge_ratio):
+        """
+        Tesseract tends to work well in images of higher dimensions and hence resize
+        :param patch: patch that needs to be resized
+        :param enlarge_ratio: resizing ratio
+        :return: resized patch
+        """
         patch = cv2.resize(
             patch, (0, 0), fx=enlarge_ratio, fy=enlarge_ratio)
         return patch
 
     def draw(self, score_board: ScoreBoard, result: Result):
+        """
+
+        :param score_board: Scoreboard object with its metadata
+        :param result: Processed result
+        """
         score_board.raw_img = \
             self.render.draw_boundary(score_board.raw_img.copy(), score_board.raw_img)
 
@@ -63,9 +91,30 @@ class OCRCore(AppContext):
         if result.serving_player == "unknown":
             draw_text = "Recognizing..."
         elif result.serving_player == "name_1":
-            draw_text = result.name_1
+            draw_text = result.name_1.title()
         else:
-            draw_text = result.name_2
+            draw_text = result.name_2.title()
 
         self.render.text(score_board.raw_img, "Serving Player: {}".format(draw_text),
                          coordinate=(880, 870))
+
+    def process_result(self, result: dict, score_board: ScoreBoard):
+        """
+
+        :param result: unchecked result
+        :param score_board: Scoreboard data object
+        """
+        result["bbox"] = score_board.bbox.tolist()
+        result["frame_count"] = score_board.frame_count
+        if "serving_player" not in result.keys():
+            result["serving_player"] = "unknown"
+        result = Result(score_board=score_board,
+                        name_1=result["name_1"],
+                        name_2=result["name_2"],
+                        serving_player=result["serving_player"],
+                        score_1=result["score_1"],
+                        score_2=result["score_2"])
+        self.draw(score_board, result)
+        if self.streamer_profile["evaluation"]:
+            if str(score_board.frame_count) in self.gt_ann.keys():
+                self.csv_logger.store(result)

@@ -46,7 +46,7 @@ class DLTextRecognizer(OCRCore):
         img = img.view(1, *img.size())
         return img
 
-    def recognition(self, patches, score_board: ScoreBoard):
+    def analyze(self, patches, score_board: ScoreBoard):
         result = {}
         for k, patch in patches.items():
 
@@ -75,22 +75,9 @@ class DLTextRecognizer(OCRCore):
                 result["name_2"] = self.sanitize(name)
                 result["score_2"] = score.lower().strip()
 
-        result["bbox"] = score_board.bbox.tolist()
-        result["frame_count"] = score_board.frame_count
-        if "serving_player" not in result.keys():
-            result["serving_player"] = "unknown"
-        result = Result(score_board=score_board,
-                        name_1=result["name_1"],
-                        name_2=result["name_2"],
-                        serving_player=result["serving_player"],
-                        score_1=result["score_1"],
-                        score_2=result["score_2"])
+        self.process_result(result, score_board)
 
-        self.draw(score_board, result)
-        if str(score_board.frame_count) in self.gt_ann.keys():
-            self.csv_logger.store(result)
-
-    def run(self, score_board: ScoreBoard):
+    def recognize(self, score_board: ScoreBoard):
         score_board_img = cv2.cvtColor(score_board.image.copy(), cv2.COLOR_BGR2GRAY)
         patches = self.divide_image(score_board_img)
-        self.recognition(patches, score_board)
+        self.analyze(patches, score_board)

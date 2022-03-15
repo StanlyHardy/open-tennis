@@ -17,7 +17,8 @@ CONFIGURATION_FILE = os.path.join(CONFIG_DIR, "app_config.yaml")
 TEXT_REC_CONFIG_FILE = os.path.join(CONFIG_DIR, "text_rec_config.yaml")
 DETECTOR_CONFIG_FILE = os.path.join(CONFIG_DIR, "detector_config.yaml")
 PLAYERS_FILE_PATH = os.path.join(CONFIG_DIR, "data/gt/players.csv")
-GT_FILE_PATH =os.path.join(ROOT_DIR, "assets/data/gt/groundtruth.json")
+GT_FILE_PATH = os.path.join(ROOT_DIR, "assets/data/gt/groundtruth.json")
+
 
 class AppContext(object):
     stream = open(CONFIGURATION_FILE, 'r')

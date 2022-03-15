@@ -44,7 +44,7 @@ class ScoreDetector(AppContext):
             if confs[i] >= threshold:
                 x1, y1, x2, y2 = map(int, box)
                 cropped_image = image_src[y1:y2, x1:x2]
-                self.text_recognizer.run(ScoreBoard(cropped_image, frame_count, box, image_src))
+                self.text_recognizer.recognize(ScoreBoard(cropped_image, frame_count, box, image_src))
 
                 self.render.rect(
                     image_src, (x1, y1), (x2, y2),

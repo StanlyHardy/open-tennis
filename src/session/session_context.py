@@ -8,17 +8,11 @@ class SessionContext(AppContext):
     def __init__(self):
         self.frame_count = 0
 
-    def set_overlay_frame(self, frame):
-        self.overlayframe = frame.copy()
-
     def set_detection_frame(self, frame):
         self.detection_frame = frame.copy()
 
     def get_detection_frame(self):
         return self.detection_frame
-
-    def get_overlay_frame(self):
-        return self.overlayframe
 
     def is_interrupted(self):
         k = cv2.waitKey(1)

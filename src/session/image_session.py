@@ -33,7 +33,6 @@ class ImageStreamer(SessionContext):
         file_path = self.img_paths[self.img_count]
         self.frame_count = os.path.basename(file_path).split(".")[0]
         frame = cv2.imread(file_path)
-        self.set_overlay_frame(frame)
         self.set_detection_frame(frame)
         self.img_count += 1
 
