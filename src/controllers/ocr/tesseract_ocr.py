@@ -4,6 +4,7 @@ import cv2
 
 import tesserocr
 
+from src.controllers.ocr.crnn import alphabets
 from src.controllers.ocr.ocr_core import OCRCore
 from src.utils.daos import ScoreBoard
 from PIL import Image
@@ -15,6 +16,9 @@ class TesserTextRecognizer(OCRCore):
         OCR Recognition based on TesserOCR.
         """
         super().__init__()
+        self.text_rec_config.preprocessing.ALPHABETS = alphabets.alphabet
+        self.text_rec_config.model.num_classes = len(self.text_rec_config.preprocessing.ALPHABETS)
+
         self.api = tesserocr.PyTessBaseAPI()
         self.symbol_pattern = re.compile("[A-Za-z0-9]+")
 

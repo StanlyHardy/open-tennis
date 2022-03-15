@@ -1,26 +1,36 @@
 import cv2
 import numpy as np
+import onnxruntime as rt
 import torch
 from PIL import Image
 
-from src import AppContext
-from src.controllers.ocr.dl_txt_recognizer import DLTextRecognizer
-from src.controllers.ocr.tesseract_ocr import TesserTextRecognizer
-from src.utils.daos import InputFrame, ScoreBoard
+from src.controllers.ModelManager import ModelManager
 from src.controllers.detector.detector_utils import letterbox_image, non_max_suppression, scale_coords
+from src.utils.daos import InputFrame, ScoreBoard
 
 
-class ScoreDetector(AppContext):
+class ScoreDetector(ModelManager):
     """
     Detect the location of the scoreboard
     """
+
     def __init__(self):
-        if self.app_profile["models"]["ocr_engine"] == "PyTesseract":
-            print("Initializing OCR Backend : PyTesseract")
-            self.text_recognizer = TesserTextRecognizer()
-        else:
-            print("Initializing OCR Backend : CRNN")
-            self.text_recognizer = DLTextRecognizer()
+        super().__init__()
+        self.model_batch_size = self.detector_session.get_inputs()[0].shape[0]
+        model_h = self.detector_session.get_inputs()[0].shape[2]
+        model_w = self.detector_session.get_inputs()[0].shape[3]
+        self.in_w = 640 if (model_w is None or isinstance(model_w, str)) else model_w
+        self.in_h = 640 if (model_h is None or isinstance(model_h, str)) else model_h
+        self.input_name = self.detector_session.get_inputs()[0].name
+        self._model_check()
+
+    def _model_check(self):
+        if self.streamer_profile["debug"]:
+            print("Input Layer: ", self.input_name)
+            print("Output Layer: ", self.detector_session.get_outputs()[0].name)
+            print("Model Input Shape: ", (self.in_w,self.in_h))
+            print("Model Output Shape: ", self.detector_session.get_outputs()[0].shape)
+        print("Host Device: ", rt.get_device())
 
     def preprocess_image(self, pil_image):
         """
@@ -71,13 +81,13 @@ class ScoreDetector(AppContext):
         pil_img = Image.fromarray(
             cv2.cvtColor(data.image, cv2.COLOR_BGR2RGB))
         norm_image = self.preprocess_image(pil_img)
-        outputs = self.session.run(None, {self.input_name: norm_image})
+        outputs = self.detector_session.run(None, {self.input_name: norm_image})
 
         batch_detections = torch.from_numpy(np.array(outputs[0]))
 
         batch_detections = non_max_suppression(
-            batch_detections, conf_thres= self.detector_config["model"]["conf_thresh"],
-            iou_thres= self.detector_config["model"]["iou_thres"], agnostic=False)
+            batch_detections, conf_thres=self.detector_config["model"]["conf_thresh"],
+            iou_thres=self.detector_config["model"]["iou_thres"], agnostic=False)
         self.result = batch_detections[0]
 
         self.post_processing(batch_detections[0], data.image, self.detector_config["model"]["conf_thresh"],

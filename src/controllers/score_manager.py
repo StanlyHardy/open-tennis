@@ -2,7 +2,7 @@ import cv2
 
 from src import AppContext
 from src.controllers.detector.score_detector import ScoreDetector
-from src.session.image_session import ImageStreamer
+from src.session.image_streamer import ImageStreamer
 from src.session.videostreamer import VideoStreamer
 from src.utils.daos import InputFrame
 
@@ -10,7 +10,7 @@ from src.utils.daos import InputFrame
 class ScoreManager(AppContext):
     """
     ScoreManager binds itself with the session
-and dispatches them to the processors that analyses the frame.
+    and dispatches them to the processors that analyses the frame.
     """
 
     def __init__(self):
