@@ -11,6 +11,7 @@ class InputFrame(object):
     """
     image: np.ndarray
     frame_count: int
+    is_warm: bool
 
 
 @dataclass

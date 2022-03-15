@@ -92,3 +92,5 @@ class ScoreDetector(ModelManager):
 
         self.post_processing(batch_detections[0], data.image, self.detector_config["model"]["conf_thresh"],
                              data.frame_count)
+
+
