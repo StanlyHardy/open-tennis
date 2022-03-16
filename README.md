@@ -27,6 +27,8 @@ Inference could run either on Video or Image streams.  The configuration could b
 ```
 python app.py 
 ```
+### <div>Demo</div>
+![alt text](https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg)
 
 ### Future work
 
