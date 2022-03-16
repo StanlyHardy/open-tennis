@@ -1,8 +1,6 @@
 
-![alt text](https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/cover.png)
 <p align="center">
-Detect and recognize the Player information from the scoreboard. The Scoreboard detection is done via <a href="https://github.com/ultralytics/yolov5">Yolov5</a>. The inference for the detection is done via <a href="https://github.com/microsoft/onnxruntime">ONNX Runtime</a> . The Player information is extracted via CRNN or TessarOCR. Evaluation is run to determine the average matching player data.
-</p>
+Extraction of the player information occurs by a series of detection followed by text recognition.  Utilized both PyTesseract and CRNN for player information extraction. <a href="https://github.com/microsoft/onnxruntime">ONNX Runtime</a> has been utilized for detection. The results are post-processed before dispatching them to the evaluator. </p>
 
 ## <div align="center">System Architecture</div>
  <p>
@@ -94,7 +92,7 @@ python app.py
  </tr>
  <tr>
   <td rowspan="5">&nbsp; Streamer </td>
-  <td>&nbsp; <code>should_draw'</td>
+  <td>&nbsp; <code>should_draw'</code></td>
   <td>&nbsp;Draws over the frames for visualization , if enabled.</td>
  </tr>
  <tr>
@@ -114,7 +112,7 @@ python app.py
   <td>&nbsp;Turn on if the evaluation has to be done over the image set. Both image set and the annotations are required in this case.</td>
  </tr>
  <td rowspan="5">&nbsp; Models </td>
-  <td>&nbsp; <code>score_det_model'</td>
+  <td>&nbsp; <code>score_det_model'</code></td>
   <td>&nbsp; Path of the score detector model.</td>
  </tr>
  <tr>
