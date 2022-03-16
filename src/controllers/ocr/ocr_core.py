@@ -17,7 +17,7 @@ class OCRCore(AppContext):
         mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
         self.players = list(mapped_players)
 
-    def sanitize(self, name : str):
+    def sanitize(self, name: str) -> str:
         """
         Sanitize the predicted player name based on the closest possible match over the list of
         the existing player.
@@ -28,9 +28,9 @@ class OCRCore(AppContext):
         matching_name = difflib.get_close_matches(stripped_name, self.players)
         if len(matching_name) > 0:
             return matching_name[0]
-        return name
+        return "Recognizing..."
 
-    def _divide_image(self, image : np.ndarray):
+    def _divide_image(self, image: np.ndarray) -> dict:
         """
         Divide the cropped scoreboard into two patches.
             1. Upper patch has the Player 1 details
@@ -57,17 +57,6 @@ class OCRCore(AppContext):
 
         return patches
 
-    def enlarge_scoreboard_images(self, patch: np.ndarray, enlarge_ratio : float):
-        """
-        Tesseract tends to work well in images of higher dimensions and hence resize
-        :param patch: patch that needs to be resized
-        :param enlarge_ratio: resizing ratio
-        :return: resized patch
-        """
-        patch = cv2.resize(
-            patch, (0, 0), fx=enlarge_ratio, fy=enlarge_ratio)
-        return patch
-
     def draw(self, score_board: ScoreBoard, result: Result):
         """
 
@@ -82,13 +71,22 @@ class OCRCore(AppContext):
 
         self.render.text(score_board.raw_img, "Player 1: {}".format(result.name_1.title()),
                          coordinate=(870, 940))
-        self.render.text(score_board.raw_img, "Score:    {}".format(result.score_1),
-                         coordinate=(870, 980))
+        if len(result.score_1) > 0:
+            self.render.text(score_board.raw_img, "Score:    {}".format(result.score_1),
+                             coordinate=(870, 980))
+        else:
+            self.render.text(score_board.raw_img, "Recognizing...",
+                             coordinate=(870, 980))
 
         self.render.text(score_board.raw_img, "Player 2: {}".format(result.name_2.title()),
                          coordinate=(1370, 940))
-        self.render.text(score_board.raw_img, "Score:    {}".format(result.score_2),
-                         coordinate=(1370, 990))
+        if len(result.score_2) > 0:
+            self.render.text(score_board.raw_img, "Score:    {}".format(result.score_2),
+                             coordinate=(1370, 990))
+        else:
+            self.render.text(score_board.raw_img, "Recognizing...",
+                             coordinate=(1370, 990))
+
         if result.serving_player == "unknown":
             draw_text = "Recognizing..."
         elif result.serving_player == "name_1":

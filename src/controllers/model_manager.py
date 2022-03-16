@@ -2,6 +2,7 @@ from src import AppContext
 import onnxruntime as rt
 
 from src.controllers.ocr.dl_txt_recognizer import DLTextRecognizer
+from src.controllers.ocr.ocr_core import OCRCore
 from src.controllers.ocr.tesseract_ocr import TesserTextRecognizer
 
 
@@ -25,7 +26,7 @@ class ModelManager(AppContext):
 
         return session
 
-    def load_text_recognizer(self):
+    def load_text_recognizer(self) -> OCRCore:
         """
         Load the recognizer model
         :return:

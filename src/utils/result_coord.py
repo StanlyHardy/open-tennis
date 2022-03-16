@@ -26,13 +26,14 @@ class ResultCoordinator(object):
         data_dict["bbox"] = bbox
         self.buff_repo[str(frame_count)] = data_dict
 
-    def persist(self, gt_annotation: dict, total_frame_count=0):
+    def persist(self, path ,gt_annotation: dict, total_frame_count=0):
         """
         Persist the data to a json file and evaluate further.
         :param gt_annotation: ground truth annotation
         :param total_frame_count:  total frame count
         :return:
         """
-        with open('assets/data/result/rec_result.json', 'w') as outfile:
-            json.dump(self.buff_repo, outfile)
-        self.evaluator.evaluate(self.buff_repo, gt_annotation, total_frame_count)
+        if total_frame_count:
+            with open(path, 'w') as outfile:
+                json.dump(self.buff_repo, outfile)
+            self.evaluator.evaluate(self.buff_repo, gt_annotation, total_frame_count)

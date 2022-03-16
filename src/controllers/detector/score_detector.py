@@ -32,7 +32,7 @@ class ScoreDetector(ModelManager):
             print("Model Output Shape: ", self.detector_session.get_outputs()[0].shape)
         print("Host Device: ", rt.get_device())
 
-    def preprocess_image(self, pil_image):
+    def preprocess_image(self, pil_image) -> np.ndarray:
         """
         Preprocess the input frame
         :param pil_image: image on which the detection has to be made

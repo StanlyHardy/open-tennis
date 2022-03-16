@@ -2,9 +2,6 @@ import json
 import os
 from pathlib import Path
 
-import onnxruntime as rt
-import yaml
-from easydict import EasyDict as edict
 
 from src.controllers.ocr import crnn
 from src.controllers.ocr.crnn import alphabets
@@ -16,7 +13,6 @@ ROOT_DIR = Path(__file__).parents[1]
 CONFIG_DIR = os.path.join(ROOT_DIR, "assets/configs")
 CONFIGURATION_FILE = os.path.join(CONFIG_DIR, "app_config.yaml")
 PLAYERS_FILE_PATH = os.path.join(ROOT_DIR, "assets/data/gt/players.csv")
-GT_FILE_PATH = os.path.join(ROOT_DIR, "assets/data/gt/groundtruth.json")
 
 
 class AppContext(object):
@@ -31,5 +27,9 @@ class AppContext(object):
     csv_logger = ResultCoordinator()
 
     total_frame_count = 0
-    with open(GT_FILE_PATH, "r") as file:
+    ground_truth_path = os.path.expanduser(app_profile["paths"]["groundtruth_path"])
+    if not os.path.exists(ground_truth_path):
+        print("Please verify the ground-truth path {}".format(ground_truth_path))
+        exit()
+    with open(os.path.expanduser(ground_truth_path), "r") as file:
         gt_ann = json.load(file)

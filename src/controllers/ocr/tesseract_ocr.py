@@ -22,8 +22,10 @@ class TesserTextRecognizer(OCRCore):
 
         self.api = tesserocr.PyTessBaseAPI()
         self.symbol_pattern = re.compile("[A-Za-z0-9]+")
+        self.score_replacement = {'i': '1', 'l': '1', 'o': '0', 's': '5', 'b': '8', 'g': '6'}
+        self.name_replacement = {'5': 's', '0': 'o', '8': 'b', '6': 'g'}
 
-    def _preprocess(self, patch : np.ndarray):
+    def _preprocess(self, patch: np.ndarray) -> dict:
         """
         Preprocess the input patch
         :param patch:
@@ -55,7 +57,19 @@ class TesserTextRecognizer(OCRCore):
         patches = self._divide_image(thresh)
         return patches
 
-    def _analyze(self, patches : dict, score_board: ScoreBoard):
+    def map_literals(self, literals, replacement_dict):
+        """
+        Replace the noisy literals to the mapped values
+        :param literals: noisy literal
+        :param replacement_dict: dict that has the replacement literals for noisy literal
+        :return:
+        """
+        stripped_literals = literals.lower().strip()
+        literals_table = stripped_literals.maketrans(replacement_dict)
+        cleaned_literal = stripped_literals.translate(literals_table)
+        return cleaned_literal.replace("00", "0")
+
+    def _analyze(self, patches: dict, score_board: ScoreBoard):
         """
         Recognize the text in the cropped score image
         :param patches: patches that were cut previously
@@ -79,11 +93,12 @@ class TesserTextRecognizer(OCRCore):
             # extract the noisy name based on the position in which the score begins.
             name[pos] = text[:score_match_pos]
             # determine the serving player for they tend to have a symbol in the beginning
-            if self.symbol_pattern.fullmatch(name[pos][:len(name[pos]) - 1]) is not None:
+            if self.symbol_pattern.fullmatch(name[pos][0:2]) is not None:
                 if patch_position == "upper_patch":
-                    result["serving_player"] = "name_1"
-                else:
                     result["serving_player"] = "name_2"
+                else:
+                    result["serving_player"] = "name_1"
+
             # the score tends to have symbols sometimes. Clean such scores.
             reg_score = text[score_match_pos:]
             score = re.sub(r'\W+', '-', reg_score)
@@ -92,15 +107,15 @@ class TesserTextRecognizer(OCRCore):
             # pick the closest possible name from the stored player data
             noisy_name = text[:score_match_pos]
             if patch_position == "upper_patch":
-                result["name_1"] = self.sanitize(noisy_name)
+                result["name_1"] = self.map_literals(self.sanitize(noisy_name), self.name_replacement)
             else:
-                result["name_2"] = self.sanitize(noisy_name)
+                result["name_2"] = self.map_literals(self.sanitize(noisy_name), self.name_replacement)
 
             # determine the score
             if patch_position == "upper_patch":
-                result["score_1"] = score.lower().strip()
+                result["score_1"] = self.map_literals(score.lower().strip(), self.score_replacement)
             else:
-                result["score_2"] = score.lower().strip()
+                result["score_2"] = self.map_literals(score.lower().strip(), self.score_replacement)
         self.process_result(result, score_board)
 
     def recognize(self, score_board: ScoreBoard):

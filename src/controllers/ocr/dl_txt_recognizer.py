@@ -13,6 +13,7 @@ class DLTextRecognizer(OCRCore):
     """
     CRNN based scoreboard text recognizer.
     """
+
     def __init__(self):
         super().__init__()
 
@@ -28,7 +29,7 @@ class DLTextRecognizer(OCRCore):
         self.text_rec_model.eval()
         self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.alphabets)
 
-    def _preprocess(self, patch : np.ndarray):
+    def _preprocess(self, patch: np.ndarray) -> torch.tensor:
         """
         Preprocess the input image patch.
         :param patch: patch that needs to be preprocessed.
@@ -54,7 +55,7 @@ class DLTextRecognizer(OCRCore):
         img = img.view(1, *img.size())
         return img
 
-    def _analyze(self, patches : dict, score_board: ScoreBoard):
+    def _analyze(self, patches: dict, score_board: ScoreBoard):
         """
         Analyze the input patch for the occurrence of the scoreboard
         :param patches: patches that were cut previously
