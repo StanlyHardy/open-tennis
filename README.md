@@ -21,6 +21,10 @@ Extraction of the player information occurs by a series of detection followed by
 - [x] Determine the scores.
 - [x] Find the current serving player.
 - [x] Evaluate the average correct match.
+## <div align="center">Demo</div>
+ <p>
+   <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
+</p>
 
 ## <div align="center">Install</div>
 #### <div>Requirements</div>
@@ -61,10 +65,6 @@ Inference could run either on Video or Image streams.  The configuration could b
 python app.py 
 ```
 
-## <div align="center">Demo</div>
- <p>
-   <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
-</p>
 
 ## <div align="center">App Configuration</div>
 <details>
