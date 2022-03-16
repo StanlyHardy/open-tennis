@@ -59,14 +59,14 @@ pip install -r requirements.txt # install
 ```
 
 
-## <div align="center">Inference</div>
+## <div >Inference</div>
 Inference could run either on Video or Image streams.  The configuration could be changed via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please change the input paths of `video` or `images`.
 ```
 python app.py 
 ```
 
 
-## <div align="center">App Configuration</div>
+## <div >App Configuration</div>
 <details>
  <summary>App configuration(click to expand)</summary>
 <table>
@@ -166,13 +166,13 @@ python app.py
 </table>
 </details>
 
-## <div align="center">Roadmap</div>
+## <div>Roadmap</div>
 
 - [ ] Train CRNN with wide set of Data.
 - [ ] Gauge Attention OCR / Transformer architectures
 - [ ] Multi Threaded Inference
 
-## <div align="center">Acknowledgements</div>
+## <div >Acknowledgements</div>
 * [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp; 
 * [YOLOv5](https://github.com/ultralytics/yolov5)&nbsp;
 * [TesserOCR](https://github.com/sirfz/tesserocr)&nbsp; 
