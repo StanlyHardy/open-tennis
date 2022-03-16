@@ -173,3 +173,8 @@ python app.py
 - [ ] Multi Threaded Inference
 
 ## <div align="center">Acknowledgements</div>
+* [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp; 
+* [YOLOv5](https://github.com/ultralytics/yolov5)&nbsp;
+* [TesserOCR](https://github.com/sirfz/tesserocr)&nbsp; 
+* [CRNN](https://www.kaggle.com/alizahidraja/custom-ocr-crnn)&nbsp;
+* [TrOCR](https://huggingface.co/docs/transformers/model_doc/trocr)&nbsp;
