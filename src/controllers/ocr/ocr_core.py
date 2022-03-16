@@ -84,7 +84,7 @@ class OCRCore(AppContext):
             self.render.text(score_board.raw_img, "Score:    {}".format(result.score_2),
                              coordinate=(1370, 990))
         else:
-            self.render.text(score_board.raw_img,  "Score:    {}".format("Recognizing"),
+            self.render.text(score_board.raw_img, "Score:    {}".format("Recognizing"),
                              coordinate=(1370, 990))
 
         if result.serving_player == "unknown":
