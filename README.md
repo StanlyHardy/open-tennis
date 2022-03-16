@@ -24,7 +24,7 @@ pip install -r requirements.txt # install
 ### <div>Inference</div>
 Inference could run either on Video or Image streams. The configuration could be changed via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player.
 ```
-python app.py # Runs inference
+python app.py 
 ```
 
 ### Future work
