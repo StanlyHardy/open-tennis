@@ -167,8 +167,8 @@ python app.py
 </details>
 
 ## <div>Roadmap</div>
-
 - [ ] Train CRNN with wide set of Data.
+- [ ] Compute Precision/Recall for evaluation.
 - [ ] Gauge Attention OCR / Transformer architectures
 - [ ] Multi Threaded Inference
 
