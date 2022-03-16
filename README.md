@@ -64,7 +64,7 @@ python app.py
 
 
 ## <div align="center">Demo</div>
-![alt text](https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg)
+![alt text](https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/cover.png)
 ## <div align="center">App Configuration</div>
 <details>
  <summary>App configuration(click to expand)</summary>
