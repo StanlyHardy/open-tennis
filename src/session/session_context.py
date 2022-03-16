@@ -36,6 +36,5 @@ class SessionContext(AppContext):
         """
         k = cv2.waitKey(1)
         if k == ord('q'):
-            self.csv_logger.persist(os.path.expanduser(self.app_profile["paths"]["logs_path"]), self.gt_ann)
             return True
         return False

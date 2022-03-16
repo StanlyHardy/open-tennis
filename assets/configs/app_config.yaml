@@ -18,5 +18,5 @@ models:
   detector_config : "assets/configs/detector_config.yaml"
   text_rec_model : "assets/models/text_recog.pth" # Model path of CRNN
   text_rec_config : "assets/configs/text_rec_config.yaml"
-  ocr_engine : "CRNN" # CRNN or PyTesseract
+  ocr_engine : "PyTesseract" # CRNN or PyTesseract
 

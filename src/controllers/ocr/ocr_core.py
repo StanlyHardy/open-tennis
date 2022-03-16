@@ -75,7 +75,7 @@ class OCRCore(AppContext):
             self.render.text(score_board.raw_img, "Score:    {}".format(result.score_1),
                              coordinate=(870, 980))
         else:
-            self.render.text(score_board.raw_img, "Recognizing...",
+            self.render.text(score_board.raw_img, "Score:    {}".format("Recognizing"),
                              coordinate=(870, 980))
 
         self.render.text(score_board.raw_img, "Player 2: {}".format(result.name_2.title()),
@@ -84,7 +84,7 @@ class OCRCore(AppContext):
             self.render.text(score_board.raw_img, "Score:    {}".format(result.score_2),
                              coordinate=(1370, 990))
         else:
-            self.render.text(score_board.raw_img, "Recognizing...",
+            self.render.text(score_board.raw_img,  "Score:    {}".format("Recognizing"),
                              coordinate=(1370, 990))
 
         if result.serving_player == "unknown":
@@ -116,7 +116,7 @@ class OCRCore(AppContext):
         self.draw(score_board, result)
         if self.app_profile["streamer"]["evaluation"]:
             if str(score_board.frame_count) in self.gt_ann.keys():
-                self.csv_logger.store(result)
+                self.result_coordinator.store(result)
 
     def recognize(self, score_board: ScoreBoard):
         """

@@ -18,7 +18,7 @@ class ImageStreamer(SessionContext):
         if not os.path.isdir(self.img_dir):
             print("Please check if the image directory is vald {}".format(self.img_dir))
             exit()
-        self.img_paths = glob(self.img_dir + "*.jpg")[:100]
+        self.img_paths = glob(self.img_dir + "*.jpg")
         if len(self.img_paths) == 0:
             print("The folder {} has got zero images.".format(os.path.expanduser(self.img_dir)))
             exit()
@@ -45,8 +45,8 @@ class ImageStreamer(SessionContext):
         Retrieve the frame from the disk and update the session
         """
         if self.img_count == self.total_frame_count:
-            self.csv_logger.persist(os.path.expanduser(self.app_profile["paths"]["logs_path"]), self.gt_ann,
-                                    self.total_frame_count)
+            self.result_coordinator.persist(os.path.expanduser(self.app_profile["paths"]["logs_path"]), self.gt_ann,
+                                            self.total_frame_count)
 
             print("Completed!...")
             time.sleep(0.5)
