@@ -26,7 +26,7 @@ Extraction of the player information occurs by a series of detection followed by
    <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
 </p>
 
-## <div align="center">Install</div>
+## <div>Install</div>
 #### <div>Requirements</div>
 - Linux
 - CUDA>= 10.0
