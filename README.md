@@ -142,7 +142,7 @@ python app.py
  <summary>Detector Configuration(click to expand)</summary>
 <table>
  <tr>
-  <td rowspan="5">&nbsp; Paths </td>
+  <td rowspan="5">&nbsp; YOLOv5 </td>
   <td>&nbsp; <code>execution_env</code></td>
   <td>&nbsp;ONNX Runtime provides support for CUDA, CPU and TensorRT. By default, CUDA is chosen. ONNX Runtime falls back to cpu if CUDA is unavailable.</td>
  </tr>
