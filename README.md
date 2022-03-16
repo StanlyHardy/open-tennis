@@ -9,9 +9,10 @@ Detect and recognize the Player information from the scoreboard. The Scoreboard 
 
 ### <div>Features</div>
 
-- [x] Recognize Player Names
-- [x] Determine score
-- [x] Current Serving Player Indicator
+- [x] Recognize the Player Names.
+- [x] Determine the scores.
+- [x] Find the current serving player.
+- [x] Evaluate the average correct match.
 
 ### <div>Install</div>
 
@@ -22,7 +23,7 @@ pip install -r requirements.txt # install
 ```
 
 ### <div>Inference</div>
-Inference could run either on Video or Image streams. The configuration could be changed via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please change the input paths of `video` or `images` and `ground_truth` in `app_config.yaml`.
+Inference could run either on Video or Image streams.  The configuration could be changed via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please change the input paths of `video` or `images`.
 ```
 python app.py 
 ```
@@ -30,5 +31,5 @@ python app.py
 ### Future work
 
 - [ ] Train CRNN with wide set of Data.
-- [ ] Adapt Attention OCR or Transformer architectures
+- [ ] Gauge Attention OCR / Transformer architectures
 - [ ] Multi Threaded Inference
