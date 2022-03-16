@@ -1,6 +1,6 @@
 
 ![alt text](https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/cover.png)
-<p>
+<p align="center">
 Detect and recognize the Player information from the scoreboard. The Scoreboard detection is done via <a href="https://github.com/ultralytics/yolov5">Yolov5</a>. The inference for the detection is done via <a href="https://github.com/microsoft/onnxruntime">ONNX Runtime</a> . The Player information is extracted via CRNN or TessarOCR. Evaluation is run to determine the average matching player data.
 </p>
 
