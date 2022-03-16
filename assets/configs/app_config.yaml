@@ -11,7 +11,7 @@ streamer:
   view_imshow : true
   save_stream : false
   debug : false # turn on or off debug logs
-  evaluation : true # Calculates the average matching names, scores, serving player over the test dataset.
+  evaluation : false # Calculates the average matching names, scores, serving player over the test dataset.
 # Model Paths
 models:
   score_det_model: "assets/models/detector.onnx" # Model path of the Detector
