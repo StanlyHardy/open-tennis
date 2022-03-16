@@ -1,23 +1,27 @@
 # Score Watcher
-### Detect and recognize the Player information from the scoreboard. The Scoreboard detection is done via [Yolov5](https://github.com/ultralytics/yolov5). [ONNX Runtime](https://github.com/microsoft/onnxruntime) has been used to run inference. The Player information is extracted via CRNN or TessarOCR.
+<p>
+Detect and recognize the Player information from the scoreboard. The Scoreboard detection is done via [Yolov5](https://github.com/ultralytics/yolov5). The inference for the detection is done via [ONNX Runtime](https://github.com/microsoft/onnxruntime) . The Player information is extracted via CRNN or TessarOCR.
+</p>
+
+## <div align="center">System Architecture</div>
 
 ![alt text](https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/graphics/system_architecture.png)
-<div style="text-align: center;">System Architecture</div>
 
-### Features
+## <div align="center">Features</div>
+
 - [x] Recognize Player Names
 - [x] Determine score
 - [x] Current Serving Player Indicator
 
-### Install instruction
+### <div align="center">Install</div>
+
+```bash
+git clone https://github.com/StanlyHardy/score_watch # clone
+cv score_watch
+pip install -r requirements.txt # install
 ```
-TODO
-```
-### Install instruction
-```
-TODO
-```
-### Usage instruction
+
+### <div align="center">Inference</div>
 ```
 TODO
 ```
