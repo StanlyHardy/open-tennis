@@ -61,6 +61,10 @@ Inference could run either on Video or Image streams.  The configuration could b
 python app.py 
 ```
 
+## <div align="center">Demo</div>
+ <p>
+   <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
+</p>
 
 ## <div align="center">App Configuration</div>
 <details>
