@@ -4,5 +4,5 @@ _pycache__/.
 __pycache__/
 *.pyc
 assets/models
-assets/data/results
+assets/data/result
 assets/data/gt
