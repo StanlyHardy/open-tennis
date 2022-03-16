@@ -1,3 +1,4 @@
+## <div align="center">Scoreboard Watcher</div>
 
 <p align="center">
 Extraction of the player information occurs by a series of detection followed by text recognition.  Utilized both PyTesseract and CRNN for player information extraction. <a href="https://github.com/microsoft/onnxruntime">ONNX Runtime</a> has been utilized for detection. The results are post-processed before dispatching them to the evaluator. </p>
