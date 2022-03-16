@@ -27,7 +27,7 @@ class ScoreManager(AppContext):
             self.session = VideoStreamer()
 
         if self.app_profile["streamer"]["save_stream"]:
-            self.out = cv2.VideoWriter(os.path.expanduser(self.app_profile["paths"]["output_video_path"]), cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 10, (self.session.width, self.session.height))
+            self.out = cv2.VideoWriter(os.path.expanduser(self.app_profile["paths"]["output_video_path"]), cv2.VideoWriter_fourcc(*'MP4V'), 25, (self.session.width, self.session.height))
 
     def run(self):
 
