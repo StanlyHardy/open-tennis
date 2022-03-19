@@ -27,6 +27,7 @@ class ModelManager(AppContext):
             sess_options.intra_op_num_threads = multiprocessing.cpu_count()
             sess_options.execution_mode = rt.ExecutionMode.ORT_PARALLEL
 
+        sess_options.graph_optimization_level = rt.GraphOptimizationLevel.ORT_ENABLE_ALL
         # Prioritize CUDA so it can pick CUDA if available.
         EP_list = ['CUDAExecutionProvider', 'CPUExecutionProvider']
         session = rt.InferenceSession(self.app_profile["models"]["score_det_model"],
