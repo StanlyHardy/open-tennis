@@ -28,7 +28,7 @@ class ImageStreamer(SessionContext):
         print("Input Image Path : ", self.img_dir)
 
         self.img_count = 0
-        self.img_paths = sorted(self.img_paths, key=lambda x: str(os.path.splitext(x)[0]))[:100]
+        self.img_paths = sorted(self.img_paths, key=lambda x: str(os.path.splitext(x)[0]))
         self.total_frame_count = len(self.img_paths)
         self.p_bar = tqdm(range(len(self.img_paths)), desc="Streaming Images...")
 
