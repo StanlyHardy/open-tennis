@@ -21,7 +21,7 @@ class DLTextRecognizer(OCRCore):
 
         self.text_rec_model = crnn.get_crnn(self.text_rec_config).to(self.device)
 
-        checkpoint = torch.load("assets/models/text_recog.pth")
+        checkpoint = torch.load(self.app_profile["models"]["text_rec_model"])
         if 'state_dict' in checkpoint.keys():
             self.text_rec_model.load_state_dict(checkpoint['state_dict'])
         else:
