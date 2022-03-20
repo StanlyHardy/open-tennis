@@ -5,7 +5,7 @@
 
 ## <div align="center">System Architecture</div>
  <p>
-   <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/graphics/system_arch.png"></a>
+   <img  src="https://github.com/StanlyHardy/score_watch/blob/experimental/assets/graphics/sys_arch.png"></a>
 </p>
 
 ## <div align="center">How it works?</div>
