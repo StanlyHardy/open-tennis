@@ -1,7 +1,7 @@
 ## <div align="center">Scoreboard Watcher</div>
 
 <p align="center">
-Extraction of the player information occurs by a series of detection followed by text recognition.  Utilized both PyTesseract and CRNN for player information extraction. <a href="https://github.com/microsoft/onnxruntime">ONNX Runtime</a> has been utilized for detection. The results are post-processed before dispatching them to the evaluator. </p>
+ Extraction of the player information occurs by a series of detection followed by text recognition.  Utilized both PyTesseract and CRNN for player information extraction. <a href="https://developer.nvidia.com/tensorrt">TensorRT</a> has been utilized for detection.TensorRt Version of Scoreboard Watcher spikes up the performance 2x times. The results are post-processed before dispatching them to the evaluator. </p>
 
 ## <div align="center">System Architecture</div>
  <p>
@@ -44,9 +44,9 @@ conda activate scorewatch
 conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
 ```
 
-4. Install onnxruntime-gpu. Mere onnxruntime will be slow.
+4. Install TensorRT
 ```bash
-pip install onnxruntime-gpu
+pip install -U nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com
 ```
 5. Clone the repository
 ```bash
