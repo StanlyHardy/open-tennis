@@ -1,21 +1,41 @@
 import time
+
+import cv2
 import torch
-import torchvision
 import numpy as np
-from PIL import Image
 
 
-def letterbox_image(image, size):
-    iw, ih = image.size
-    w, h = size
-    scale = min(w / iw, h / ih)
-    nw = int(iw * scale)
-    nh = int(ih * scale)
+def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):
+    # Resize and pad image while meeting stride-multiple constraints
+    shape = im.shape[:2]  # current shape [height, width]
+    if isinstance(new_shape, int):
+        new_shape = (new_shape, new_shape)
 
-    image = image.resize((nw, nh), Image.BICUBIC)
-    new_image = Image.new('RGB', size, (128, 128, 128))
-    new_image.paste(image, ((w - nw) // 2, (h - nh) // 2))
-    return new_image
+    # Scale ratio (new / old)
+    r = min(new_shape[0] / shape[0], new_shape[1] / shape[1])
+    if not scaleup:  # only scale down, do not scale up (for better val mAP)
+        r = min(r, 1.0)
+
+    # Compute padding
+    ratio = r, r  # width, height ratios
+    new_unpad = int(round(shape[1] * r)), int(round(shape[0] * r))
+    dw, dh = new_shape[1] - new_unpad[0], new_shape[0] - new_unpad[1]  # wh padding
+    if auto:  # minimum rectangle
+        dw, dh = np.mod(dw, stride), np.mod(dh, stride)  # wh padding
+    elif scaleFill:  # stretch
+        dw, dh = 0.0, 0.0
+        new_unpad = (new_shape[1], new_shape[0])
+        ratio = new_shape[1] / shape[1], new_shape[0] / shape[0]  # width, height ratios
+
+    dw /= 2  # divide padding into 2 sides
+    dh /= 2
+
+    if shape[::-1] != new_unpad:  # resize
+        im = cv2.resize(im, new_unpad, interpolation=cv2.INTER_LINEAR)
+    top, bottom = int(round(dh - 0.1)), int(round(dh + 0.1))
+    left, right = int(round(dw - 0.1)), int(round(dw + 0.1))
+    im = cv2.copyMakeBorder(im, top, bottom, left, right, cv2.BORDER_CONSTANT, value=color)  # add border
+    return im, ratio, (dw, dh)
 
 
 def box_iou(box1, box2):
@@ -39,18 +59,36 @@ def box_iou(box1, box2):
     area2 = box_area(box2.T)
 
     # inter(N,M) = (rb(N,M,2) - lt(N,M,2)).clamp(0).prod(2)
-    inter = (torch.min(box1[:, None, 2:], box2[:, 2:]) -
-             torch.max(box1[:, None, :2], box2[:, :2])).clamp(0).prod(2)
-    # iou = inter / (area1 + area2 - inter)
-    return inter / (area1[:, None] + area2 - inter)
+    inter = (np.minimum(box1[:, None, 2:], box2[:, 2:]) - np.maximum(box1[:, None, :2], box2[:, :2])).clip(0).prod(2)
+    return inter / (area1[:, None] + area2 - inter)  # iou = inter / (area1 + area2 - inter)
+
+
+def np_nms(boxes, scores, iou_threshold):
+    idxs = scores.argsort()
+    keep = []
+    while idxs.size > 0:
+        max_score_index = idxs[-1]
+        max_score_box = boxes[max_score_index][None, :]
+        keep.append(max_score_index)
+
+        if idxs.size == 1:
+            break
+        idxs = idxs[:-1]
+        other_boxes = boxes[idxs]
+        ious = box_iou(max_score_box, other_boxes)
+        idxs = idxs[ious[0] <= iou_threshold]
+
+    keep = np.array(keep)  # Tensor
+    return keep
 
 
 def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=None, agnostic=False, multi_label=False,
-                        labels=()):
+                        labels=(), max_det=300):
     """Runs Non-Maximum Suppression (NMS) on inference results
     Returns:
          list of detections, on (n,6) tensor per image [xyxy, conf, cls]
     """
+
     nc = prediction.shape[2] - 5  # number of classes
     xc = prediction[..., 4] > conf_thres  # candidates
 
@@ -59,9 +97,7 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
     assert 0 <= iou_thres <= 1, f'Invalid IoU {iou_thres}, valid values are between 0.0 and 1.0'
 
     # Settings
-    # (pixels) maximum and minimum box width and height
-    max_wh = 4096  # min_wh = 2
-    max_det = 300  # maximum number of detections per image
+    min_wh, max_wh = 2, 4096  # (pixels) minimum and maximum box width and height
     max_nms = 30000  # maximum number of boxes into torchvision.ops.nms()
     time_limit = 10.0  # seconds to quit after
     redundant = True  # require redundant detections
@@ -69,8 +105,7 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
     merge = False  # use merge-NMS
 
     t = time.time()
-    output = [torch.zeros((0, 6), device=prediction.device)
-              ] * prediction.shape[0]
+    output = [np.zeros((0, 6))] * prediction.shape[0]
     for xi, x in enumerate(prediction):  # image index, image inference
         # Apply constraints
         # x[((x[..., 2:4] < min_wh) | (x[..., 2:4] > max_wh)).any(1), 4] = 0  # width-height
@@ -78,12 +113,12 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
 
         # Cat apriori labels if autolabelling
         if labels and len(labels[xi]):
-            lxi = labels[xi]
-            v = torch.zeros((len(lxi), nc + 5), device=x.device)
-            v[:, :4] = lxi[:, 1:5]  # box
+            l = labels[xi]
+            v = np.zeros((len(l), nc + 5))
+            v[:, :4] = l[:, 1:5]  # box
             v[:, 4] = 1.0  # conf
-            v[range(len(lxi)), lxi[:, 0].long() + 5] = 1.0  # cls
-            x = torch.cat((x, v), 0)
+            v[range(len(l)), l[:, 0].long() + 5] = 1.0  # cls
+            x = np.concatenate((x, v), axis=0)
 
         # If none remain process next image
         if not x.shape[0]:
@@ -98,41 +133,34 @@ def non_max_suppression(prediction, conf_thres=0.25, iou_thres=0.45, classes=Non
         # Detections matrix nx6 (xyxy, conf, cls)
         if multi_label:
             i, j = (x[:, 5:] > conf_thres).nonzero(as_tuple=False).T
-            x = torch.cat((box[i], x[i, j + 5, None], j[:, None].float()), 1)
+            x = np.concatenate((box[i], x[i, j + 5, None], j[:, None].float()), axis=1)
         else:  # best class only
-            conf, j = x[:, 5:].max(1, keepdim=True)
-            x = torch.cat((box, conf, j.float()), 1)[
-                conf.view(-1) > conf_thres]
+            conf = x[:, 5:].max(1, keepdims=True)
+            j = x[:, 5:].argmax(1).reshape(-1, 1)
+            x = np.concatenate((box, conf, j.astype(np.float32)), axis=1)[conf.reshape(-1) > conf_thres]
 
         # Filter by class
         if classes is not None:
-            x = x[(x[:, 5:6] == torch.tensor(classes, device=x.device)).any(1)]
-
-        # Apply finite constraint
-        # if not torch.isfinite(x).all():
-        #     x = x[torch.isfinite(x).all(1)]
+            x = x[(x[:, 5:6] == np.array(classes)).any(1)]
 
         # Check shape
         n = x.shape[0]  # number of boxes
         if not n:  # no boxes
             continue
         elif n > max_nms:  # excess boxes
-            # sort by confidence
-            x = x[x[:, 4].argsort(descending=True)[:max_nms]]
+            x = x[x[:, 4].argsort(descending=True)[:max_nms]]  # sort by confidence
 
         # Batched NMS
         c = x[:, 5:6] * (0 if agnostic else max_wh)  # classes
-        # boxes (offset by class), scores
-        boxes, scores = x[:, :4] + c, x[:, 4]
-        i = torchvision.ops.nms(boxes, scores, iou_thres)  # NMS
+        boxes, scores = x[:, :4] + c, x[:, 4]  # boxes (offset by class), scores
+        i = np_nms(boxes, scores, iou_thres)  # NMS
         if i.shape[0] > max_det:  # limit detections
             i = i[:max_det]
         if merge and (1 < n < 3E3):  # Merge NMS (boxes merged using weighted mean)
             # update boxes as boxes(i,4) = weights(i,n) * boxes(n,4)
             iou = box_iou(boxes[i], boxes) > iou_thres  # iou matrix
             weights = iou * scores[None]  # box weights
-            x[i, :4] = torch.mm(weights, x[:, :4]).float(
-            ) / weights.sum(1, keepdim=True)  # merged boxes
+            x[i, :4] = np.matmul(weights, x[:, :4]).float() / weights.sum(1, keepdim=True)  # merged boxes
             if redundant:
                 i = i[iou.sum(1) > 1]  # require redundancy
 
@@ -159,11 +187,9 @@ def clip_coords(boxes, img_shape):
 
 
 def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):
-    # Rescale coords (xyxy) from img1_shape to img0_shape
     if ratio_pad is None:  # calculate from img0_shape
-        gain = max(img1_shape) / max(img0_shape)  # gain  = old / new
-        pad = (img1_shape[1] - img0_shape[1] * gain) / \
-              2, (img1_shape[0] - img0_shape[0] * gain) / 2  # wh padding
+        gain = min(img1_shape[0] / img0_shape[0], img1_shape[1] / img0_shape[1])  # gain  = old / new
+        pad = (img1_shape[1] - img0_shape[1] * gain) / 2, (img1_shape[0] - img0_shape[0] * gain) / 2  # wh padding
     else:
         gain = ratio_pad[0][0]
         pad = ratio_pad[1]
@@ -176,7 +202,6 @@ def scale_coords(img1_shape, coords, img0_shape, ratio_pad=None):
 
 
 def xywh2xyxy(x):
-    # Convert nx4 boxes from [x, y, w, h] to [x1, y1, x2, y2] where xy1=top-left, xy2=bottom-right
     y = torch.zeros_like(x) if isinstance(
         x, torch.Tensor) else np.zeros_like(x)
     y[:, 0] = x[:, 0] - x[:, 2] / 2  # top left x

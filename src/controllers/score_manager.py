@@ -1,4 +1,5 @@
 import os.path
+import time
 
 import cv2
 import numpy as np
@@ -33,7 +34,6 @@ class ScoreManager(AppContext):
 
         """
         Retrieves the frames from the session and passes it forward to do recognition.
-        :return:
         """
         while not self.session.is_interrupted():
             self.session.update()
@@ -45,6 +45,10 @@ class ScoreManager(AppContext):
                 self.out.write(det_frame)
 
     def _warmup(self):
+        """
+        Warm up since the first few frames tends to be slow
+        """
         for i in tqdm(range(self.detector_config["model"]["warm_up"]),desc="Warming up..."):
-            blank_frame = np.zeros((self.score_detector.in_h, self.score_detector.in_w, 3), np.uint8)
+            blank_frame = np.zeros((self.detector_config["model"]["img_size"],
+                                    self.detector_config["model"]["img_size"], 3), np.uint8)
             self.score_detector.detect(InputFrame(blank_frame, 0, True))

@@ -1,11 +1,9 @@
 import cv2
 import numpy as np
-import onnxruntime as rt
 import torch
-from PIL import Image
 
+from src.controllers.detector.detector_utils import letterbox, non_max_suppression, scale_coords
 from src.controllers.model_manager import ModelManager
-from src.controllers.detector.detector_utils import letterbox_image, non_max_suppression, scale_coords
 from src.utils.daos import InputFrame, ScoreBoard
 
 
@@ -16,81 +14,93 @@ class ScoreDetector(ModelManager):
 
     def __init__(self):
         super().__init__()
-        self.model_batch_size = self.detector_session.get_inputs()[0].shape[0]
-        model_h = self.detector_session.get_inputs()[0].shape[2]
-        model_w = self.detector_session.get_inputs()[0].shape[3]
-        self.in_w = 640 if (model_w is None or isinstance(model_w, str)) else model_w
-        self.in_h = 640 if (model_h is None or isinstance(model_h, str)) else model_h
-        self.input_name = self.detector_session.get_inputs()[0].name
-        self._model_check()
 
-    def _model_check(self):
-        if self.app_profile["streamer"]["debug"]:
-            print("Input Layer: ", self.input_name)
-            print("Output Layer: ", self.detector_session.get_outputs()[0].name)
-            print("Model Input Shape: ", (self.in_w,self.in_h))
-            print("Model Output Shape: ", self.detector_session.get_outputs()[0].shape)
-        print("Host Device: ", rt.get_device())
+    def normalize(self, img):
+        """
+        Normalize the frame before detection
+        Args:
+            img: resized image that needs to be normalized
 
-    def preprocess_image(self, pil_image) -> np.ndarray:
-        """
-        Preprocess the input frame
-        :param pil_image: image on which the detection has to be made
-        :param in_size: size of the input
-        :return: Preprocessed imagedata
-        """
-        resized = letterbox_image(pil_image, (self.in_w, self.in_h))
-        img_in = np.transpose(resized, (2, 0, 1)).astype(np.float32)
-        img_in /= 255.0
-        img_in = np.expand_dims(img_in, axis=0)
-        return img_in
+        Returns:
 
-    def post_processing(self, detections, image_src, threshold, frame_count):
         """
-        Postprocess the detection and pass it to the Player recognizers :func:`~src.ocr.ocr_core.recognize
-        :param detections:
-        :param image_src:
-        :param threshold:
-        :param frame_count:
-        :return:
-        """
-        boxs = detections[..., :4].numpy()
-        confs = detections[..., 4].numpy()
-        if isinstance(image_src, str):
-            image_src = cv2.imread(image_src)
-        elif isinstance(image_src, np.ndarray):
-            image_src = image_src
+        img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+        img = np.ascontiguousarray(img)
+        img = img.astype(np.float32)
+        img = torch.from_numpy(img).to(self.device)
+        img = img.float()  # uint8 to fp32
+        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+        if len(img.shape) == 3:
+            img = img[None]
+        return img
 
-        h, w = image_src.shape[:2]
-        boxs[:, :] = scale_coords((self.in_h, self.in_w), boxs[:, :], (h, w)).round()
+    def infer(self, img):
+        """
+        Run inference to determine the coords of the scoreboard
+        Args:
+            img: image to detect the scoreboard
+
+        Returns:
+
+        """
+        assert img.shape == self.bindings['images'].shape, (img.shape, self.bindings['images'].shape)
+        self.binding_addrs['images'] = int(img.data_ptr())
+
+        self.context.execute_v2(list(self.binding_addrs.values()))
+        pred = self.bindings['output'].data
+        pred = pred.cpu().numpy()
+        return pred
+
+    def post_process(self, pred, processed_image, original_img, frame_count):
+        """
+        Post process the detected result and pass it to the player information extractor
+        Args:
+            pred: predicted result
+            processed_image: resized image
+            original_img: original input frame
+            frame_count: the id of the current frame
+
+        """
+        for i, det in enumerate(pred):  # detections per image
+            if det is not None and len(det):
+                det[:, :4] = scale_coords(processed_image.shape[2:], det[:, :4], original_img.shape).round()
+
+        output = pred[0]
+        boxes = output[:, :4]
+        scores = output[:, 4]
+        classes = output[:, 5]
+        h, w = original_img.shape[:2]
         tl = round(0.002 * (w + h) / 2) + 1
-        for i, box in enumerate(boxs):
-            if confs[i] >= threshold:
-                x1, y1, x2, y2 = map(int, box)
-                cropped_image = image_src[y1:y2, x1:x2]
-                self.text_recognizer.recognize(ScoreBoard(cropped_image, frame_count, box, image_src))
+        for box, score, c in zip(boxes, scores, classes):
+            top_left, bottom_right = box[:2].astype(np.int64).tolist(), box[2:4].astype(np.int64).tolist()
 
-                self.render.rect(
-                    image_src, (x1, y1), (x2, y2),
-                    thickness=max(
-                        int((w + h) / 600), 1)
-                )
-                self.render.text(image_src, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3)
+            x1, y1, x2, y2 = top_left[0], top_left[1], bottom_right[0], bottom_right[1]
+            cropped_image = original_img[y1:y2, x1:x2]
+            scoreboard = ScoreBoard(cropped_image, frame_count, box, original_img)
+            self.text_recognizer.recognize(scoreboard)
+
+            self.render.rect(
+                original_img, (x1, y1), (x2, y2),
+                thickness=max(
+                    int((w + h) / 600), 1)
+            )
+            self.render.text(original_img, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3)
 
     def detect(self, data: InputFrame):
-        pil_img = Image.fromarray(
-            cv2.cvtColor(data.image, cv2.COLOR_BGR2RGB))
-        norm_image = self.preprocess_image(pil_img)
-        outputs = self.detector_session.run(None, {self.input_name: norm_image})
+        """
+        Detect the scoreboard
+        Args:
+            data: data that has got the input frame
 
-        batch_detections = torch.from_numpy(np.array(outputs[0]))
+        Returns:
 
-        batch_detections = non_max_suppression(
-            batch_detections, conf_thres=self.detector_config["model"]["conf_thresh"],
-            iou_thres=self.detector_config["model"]["iou_thres"], agnostic=False)
-        self.result = batch_detections[0]
+        """
+        processed_image = letterbox(data.image, new_shape=self.imgsz, auto=False)[0]
+        processed_image = self.normalize(processed_image)
+        pred = self.infer(processed_image)
+        pred = non_max_suppression(pred, self.detector_config["model"]["conf_thresh"],
+                                   self.detector_config["model"]["iou_thresh"],
+                                   classes=None,
+                                   agnostic=False)
 
-        self.post_processing(batch_detections[0], data.image, self.detector_config["model"]["conf_thresh"],
-                             data.frame_count)
-
-
+        self.post_process(pred, processed_image, data.image, data.frame_count)
