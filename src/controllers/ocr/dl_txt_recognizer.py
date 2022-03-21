@@ -97,5 +97,6 @@ class DLTextRecognizer(OCRCore):
         :param score_board: Scoreboard that has got the player data.
         """
         score_board_img = cv2.cvtColor(score_board.image.copy(), cv2.COLOR_BGR2GRAY)
+        score_board_img = cv2.threshold(score_board_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
         patches = self._divide_image(score_board_img)
         self._analyze(patches, score_board)
