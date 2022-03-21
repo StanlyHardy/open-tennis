@@ -7,6 +7,6 @@ model:
   img_size:
     ow: 280
     h: 32
-    w: 160
+    w: 320
   num_classes: 0
   num_hidden: 256

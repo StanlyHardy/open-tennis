@@ -21,7 +21,7 @@ class DLTextRecognizer(OCRCore):
 
         self.text_rec_model = crnn.get_crnn(self.text_rec_config).to(self.device)
 
-        checkpoint = torch.load("assets/models/text_recog.pth")
+        checkpoint = torch.load(self.app_profile["models"]["text_rec_model"])
         if 'state_dict' in checkpoint.keys():
             self.text_rec_model.load_state_dict(checkpoint['state_dict'])
         else:
@@ -97,5 +97,6 @@ class DLTextRecognizer(OCRCore):
         :param score_board: Scoreboard that has got the player data.
         """
         score_board_img = cv2.cvtColor(score_board.image.copy(), cv2.COLOR_BGR2GRAY)
+        score_board_img = cv2.threshold(score_board_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
         patches = self._divide_image(score_board_img)
         self._analyze(patches, score_board)
