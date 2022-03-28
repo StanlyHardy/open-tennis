@@ -2,13 +2,12 @@ import re
 
 import cv2
 import numpy as np
-
 import tesserocr
+from PIL import Image
 
 from src.controllers.ocr.crnn import alphabets
 from src.controllers.ocr.ocr_core import OCRCore
 from src.utils.daos import ScoreBoard
-from PIL import Image
 
 
 class TesserTextRecognizer(OCRCore):

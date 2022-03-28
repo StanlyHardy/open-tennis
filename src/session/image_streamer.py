@@ -1,7 +1,8 @@
 import os.path
 import time
-import cv2
 from glob import glob
+
+import cv2
 from tqdm.auto import tqdm
 
 from src.session.session_context import SessionContext

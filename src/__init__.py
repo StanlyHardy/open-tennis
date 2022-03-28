@@ -8,8 +8,8 @@ from notificationcenter import *
 from src.controllers.ocr import crnn
 from src.controllers.ocr.crnn import alphabets
 from src.utils.app_utils import AppUtils
-from src.utils.result_coord import ResultCoordinator
 from src.utils.renderer import Renderer
+from src.utils.result_coord import ResultCoordinator
 
 ROOT_DIR = Path(__file__).parents[1]
 CONFIG_DIR = os.path.join(ROOT_DIR, "assets/configs")

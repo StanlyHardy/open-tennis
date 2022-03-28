@@ -1,7 +1,4 @@
-import asyncio
 import os.path
-from concurrent.futures import ThreadPoolExecutor
-from typing import List
 
 import cv2
 import numpy as np
@@ -11,7 +8,7 @@ from src import AppContext
 from src.controllers.detector.score_detector import ScoreDetector
 from src.session.image_streamer import ImageStreamer
 from src.session.videostreamer import VideoStreamer
-from src.utils.daos import InputFrame, ScoreBoard, Result
+from src.utils.daos import InputFrame, Result
 
 
 class ScoreManager(AppContext):

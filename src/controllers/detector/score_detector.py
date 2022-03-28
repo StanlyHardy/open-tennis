@@ -4,9 +4,9 @@ import onnxruntime as rt
 import torch
 from PIL import Image
 
-from src.controllers.model_manager import ModelManager
 from src.controllers.detector.detector_utils import letterbox_image, non_max_suppression, scale_coords
-from src.utils.daos import InputFrame, ScoreBoard, ScoreBox
+from src.controllers.model_manager import ModelManager
+from src.utils.daos import InputFrame, ScoreBoard
 
 
 class ScoreDetector(ModelManager):
