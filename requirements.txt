@@ -6,3 +6,4 @@ tqdm>=4.41.0
 Pillow>=7.1.2
 torchvision>=0.8.1
 easydict>=1.8
+notificationcenter>=1.0.0b2
