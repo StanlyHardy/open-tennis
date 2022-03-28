@@ -21,6 +21,9 @@ Extraction of the player information occurs by a series of detection followed by
 - [x] Determine the scores.
 - [x] Find the current serving player.
 - [x] Evaluate the average correct match.
+- [x] Quantize the model
+- [x] Multi Threaded Inference
+
 ## <div align="center">Demo</div>
  <p>
    <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
@@ -167,8 +170,7 @@ python app.py
 </details>
 
 ## <div>Roadmap</div>
-- [ ] Quantize the model
-- [ ] Multi Threaded Inference
+
 - [ ] Train CRNN with wide set of Data.
 
 ## <div >Acknowledgements</div>
