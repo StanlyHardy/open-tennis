@@ -170,8 +170,6 @@ python app.py
 - [ ] Quantize the model
 - [ ] Multi Threaded Inference
 - [ ] Train CRNN with wide set of Data.
-- [ ] Compute Precision/Recall for evaluation.
-- [ ] Gauge Attention OCR / Transformer architectures
 
 ## <div >Acknowledgements</div>
 * [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp; 

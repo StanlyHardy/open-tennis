@@ -6,7 +6,7 @@ from PIL import Image
 
 from src.controllers.model_manager import ModelManager
 from src.controllers.detector.detector_utils import letterbox_image, non_max_suppression, scale_coords
-from src.utils.daos import InputFrame, ScoreBoard
+from src.utils.daos import InputFrame, ScoreBoard, ScoreBox
 
 
 class ScoreDetector(ModelManager):
@@ -28,7 +28,7 @@ class ScoreDetector(ModelManager):
         if self.app_profile["streamer"]["debug"]:
             print("Input Layer: ", self.input_name)
             print("Output Layer: ", self.detector_session.get_outputs()[0].name)
-            print("Model Input Shape: ", (self.in_w,self.in_h))
+            print("Model Input Shape: ", (self.in_w, self.in_h))
             print("Model Output Shape: ", self.detector_session.get_outputs()[0].shape)
         print("Host Device: ", rt.get_device())
 
@@ -64,20 +64,19 @@ class ScoreDetector(ModelManager):
         h, w = image_src.shape[:2]
         boxs[:, :] = scale_coords((self.in_h, self.in_w), boxs[:, :], (h, w)).round()
         tl = round(0.002 * (w + h) / 2) + 1
+        if len(boxs) == 0:
+            self.notif_center.post_notification(sender=self.__class__.__name__,
+                                                with_name="ScoreManager", with_info=None)
         for i, box in enumerate(boxs):
             if confs[i] >= threshold:
                 x1, y1, x2, y2 = map(int, box)
                 cropped_image = image_src[y1:y2, x1:x2]
                 self.text_recognizer.recognize(ScoreBoard(cropped_image, frame_count, box, image_src))
 
-                self.render.rect(
-                    image_src, (x1, y1), (x2, y2),
-                    thickness=max(
-                        int((w + h) / 600), 1)
-                )
                 self.render.text(image_src, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3)
 
     def detect(self, data: InputFrame):
+
         pil_img = Image.fromarray(
             cv2.cvtColor(data.image, cv2.COLOR_BGR2RGB))
         norm_image = self.preprocess_image(pil_img)
@@ -93,4 +92,5 @@ class ScoreDetector(ModelManager):
         self.post_processing(batch_detections[0], data.image, self.detector_config["model"]["conf_thresh"],
                              data.frame_count)
 
-
+    async def async_detect(self, data: InputFrame):
+        self.detect(data)

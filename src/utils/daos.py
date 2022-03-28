@@ -3,6 +3,16 @@ from dataclasses import dataclass
 
 
 @dataclass
+class ScoreBox(object):
+    """
+    Detected bounding box
+    """
+    rects: np.ndarray
+    frame_count: int
+    image: np.ndarray
+
+
+@dataclass
 class InputFrame(object):
     """
     Input frame that has been retrieved during each session

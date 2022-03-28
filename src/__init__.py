@@ -1,6 +1,9 @@
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+from notificationcenter import *
 
 from src.controllers.ocr import crnn
 from src.controllers.ocr.crnn import alphabets
@@ -35,5 +38,11 @@ class AppContext(object):
     render = Renderer(app_profile)
     result_coordinator = ResultCoordinator()
     total_frame_count = 0
+    scoreboard_result = None
+    notif_center = NotificationCenter()
+    executor = ThreadPoolExecutor()
 
-
+    if app_profile["models"]["ocr_engine"] != "PyTesseract":
+        enable_threading = True
+    else:
+        enable_threading = False

@@ -57,45 +57,6 @@ class OCRCore(AppContext):
 
         return patches
 
-    def draw(self, score_board: ScoreBoard, result: Result):
-        """
-
-        :param score_board: Scoreboard object with its metadata
-        :param result: Processed result
-        """
-        score_board.raw_img = \
-            self.render.draw_canvas(score_board.raw_img.copy(), score_board.raw_img)
-
-        score_board.raw_img = \
-            self.render.draw_canvas(score_board.raw_img.copy(), score_board.raw_img)
-
-        self.render.text(score_board.raw_img, "Player 1: {}".format(result.name_1.title()),
-                         coordinate=(870, 940))
-        if len(result.score_1) > 0:
-            self.render.text(score_board.raw_img, "Score:    {}".format(result.score_1),
-                             coordinate=(870, 980))
-        else:
-            self.render.text(score_board.raw_img, "Score:    {}".format("Recognizing"),
-                             coordinate=(870, 980))
-
-        self.render.text(score_board.raw_img, "Player 2: {}".format(result.name_2.title()),
-                         coordinate=(1370, 940))
-        if len(result.score_2) > 0:
-            self.render.text(score_board.raw_img, "Score:    {}".format(result.score_2),
-                             coordinate=(1370, 990))
-        else:
-            self.render.text(score_board.raw_img, "Score:    {}".format("Recognizing"),
-                             coordinate=(1370, 990))
-
-        if result.serving_player == "unknown":
-            draw_text = "Recognizing..."
-        elif result.serving_player == "name_1":
-            draw_text = result.name_1.title()
-        else:
-            draw_text = result.name_2.title()
-
-        self.render.text(score_board.raw_img, "Serving Player: {}".format(draw_text),
-                         coordinate=(880, 870))
 
     def process_result(self, result: dict, score_board: ScoreBoard):
         """
@@ -113,7 +74,9 @@ class OCRCore(AppContext):
                         serving_player=result["serving_player"],
                         score_1=result["score_1"],
                         score_2=result["score_2"])
-        self.draw(score_board, result)
+        self.notif_center.post_notification(sender=self.__class__.__name__,
+                                            with_name="ScoreManager", with_info=result)
+
         if self.app_profile["streamer"]["evaluation"]:
             if str(score_board.frame_count) in self.gt_ann.keys():
                 self.result_coordinator.store(result)

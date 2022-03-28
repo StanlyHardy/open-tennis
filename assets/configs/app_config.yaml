@@ -1,6 +1,6 @@
 # AppLevel Configurations
 paths:
-  video_path: "~/Datasets/Tennis/top-100-shots-rallies-2018-atp-season.mp4" # Path of the video
+  video_path: "~/Datasets/top-100-shots-rallies-2018-atp-season.mp4" # Path of the video
   img_path: "~/Datasets/Tennis/images/test/images/" # Dir of test images if evaluation is turned on
   players_path: "assets/data/gt/players.csv"
   groundtruth_path: "~/Datasets/Tennis/groundtruth.json"
