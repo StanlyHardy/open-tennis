@@ -38,6 +38,7 @@ class AppContext(object):
     render = Renderer(app_profile)
     result_coordinator = ResultCoordinator()
     total_frame_count = 0
+    tl = 0
     scoreboard_result = None
     notif_center = NotificationCenter()
     executor = ThreadPoolExecutor()

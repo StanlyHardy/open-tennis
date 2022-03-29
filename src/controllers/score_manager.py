@@ -42,8 +42,9 @@ class ScoreManager(AppContext):
         :param score_board: Scoreboard object with its metadata
         :param result: Processed result
         """
-        h, w = det_frame.shape[:2]
-        tl = round(0.002 * (w + h) / 2) + 1
+        if self.tl == 0:
+            self.h, self.w = det_frame.shape[:2]
+            tl = round(0.002 * (self.w + self.h) / 2) + 1
         det_frame = \
             self.render.draw_canvas(det_frame.copy(), det_frame)
 
@@ -56,7 +57,7 @@ class ScoreManager(AppContext):
         self.render.rect(
             det_frame, (x1, y1), (x2, y2),
             thickness=max(
-                int((w + h) / 600), 1)
+                int((self.w + self.h) / 600), 1)
         )
         self.render.text(det_frame, "Player 1: {}".format(result.name_1.title()),
                          coordinate=(870, 940))
