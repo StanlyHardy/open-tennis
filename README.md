@@ -202,11 +202,10 @@ python app.py
 ## <div align="center">Roadmap</div>
 
 - [ ] Train CRNN with wide set of Data
-- [ ] Analyse player movement
 - [ ] Implement Ball Tracking, Trajectory Analysis
-- [ ] Player tracking
+- [ ] Player tracking.
 - [ ] Predict the style and the outcome of shot
-- [ ] Court Detection
+- [ ] Court edges detection
 - [ ] Player activity analysis
 
 
