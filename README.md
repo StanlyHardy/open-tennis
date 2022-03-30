@@ -172,6 +172,8 @@ python app.py
 ## <div>Roadmap</div>
 
 - [ ] Train CRNN with wide set of Data.
+- [ ] Implement Player Analyzer.
+- [ ] Implement Ball Tracking.
 
 ## <div >Acknowledgements</div>
 * [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp; 
