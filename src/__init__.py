@@ -35,7 +35,7 @@ class AppContext(object):
     text_rec_config.preprocessing.alphabets = alphabets.alphabet
     text_rec_config.model.num_classes = len(text_rec_config.preprocessing.alphabets)
 
-    render = Renderer(app_profile)
+    renderer = Renderer(app_profile)
     result_coordinator = ResultCoordinator()
     total_frame_count = 0
     tl = 0

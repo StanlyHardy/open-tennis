@@ -7,3 +7,4 @@ Pillow>=7.1.2
 torchvision>=0.8.1
 easydict>=1.8
 notificationcenter>=1.0.0b2
+numba>=0.55.1

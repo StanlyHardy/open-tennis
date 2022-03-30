@@ -73,7 +73,7 @@ class ScoreDetector(ModelManager):
                 cropped_image = image_src[y1:y2, x1:x2]
                 self.text_recognizer.recognize(ScoreBoard(cropped_image, frame_count, box, image_src))
 
-                self.render.text(image_src, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3)
+                self.renderer.text(image_src, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3)
 
     def detect(self, data: InputFrame):
 

@@ -1,4 +1,5 @@
 import difflib
+from functools import cache
 
 import numpy as np
 
@@ -16,6 +17,7 @@ class OCRCore(AppContext):
         mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
         self.players = list(mapped_players)
 
+    @cache
     def sanitize(self, name: str) -> str:
         """
         Sanitize the predicted player name based on the closest possible match over the list of
@@ -55,7 +57,6 @@ class OCRCore(AppContext):
         patches = {"upper_patch": upper_part, "lower_patch": lower_part}
 
         return patches
-
 
     def process_result(self, result: dict, score_board: ScoreBoard):
         """

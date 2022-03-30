@@ -1,5 +1,6 @@
 import time
 
+import numba as nb
 import numpy as np
 import torch
 import torchvision
@@ -19,6 +20,7 @@ def letterbox_image(image, size):
     return new_image
 
 
+@nb.jit(nopython=True)
 def box_iou(box1, box2):
     # https://github.com/pytorch/vision/blob/master/torchvision/ops/boxes.py
     """

@@ -4,16 +4,20 @@
 Extraction of the player information occurs by a series of detection followed by text recognition.  Utilized both PyTesseract and CRNN for player information extraction. <a href="https://github.com/microsoft/onnxruntime">ONNX Runtime</a> has been utilized for detection. The results are post-processed before dispatching them to the evaluator. </p>
 
 ## <div align="center">System Architecture</div>
+
  <p>
    <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/graphics/system_arch.png"></a>
 </p>
 
 ## <div align="center">How it works?</div>
+
 - There can be either an Image session or a Video Playback session. Both sessions are bound to session context.
 - The Score Manager retrieves the frames from the session context and dispatches them to detection.
-- After an initial warm-up epoch, the model is ready for inference via ONNXRuntime over the incoming frames and passes the result to OCRRoot. 
-- The OCRRoot uses either the TessarOCR or CRNN for Player information extraction. The recognized noisy labels get sanitized before passing them to the coordinator. Renderer could be utilized to draw results.
-- The Result Coordinator coordinates the result for further evaluation during the image playback session. 
+- After an initial warm-up epoch, the model is ready for inference via ONNXRuntime over the incoming frames and passes
+  the result to OCRRoot.
+- The OCRRoot uses either the TessarOCR or CRNN for Player information extraction. The recognized noisy labels get
+  sanitized before passing them to the coordinator. Renderer could be utilized to draw results.
+- The Result Coordinator coordinates the result for further evaluation during the image playback session.
 
 ## <div align="center">Features</div>
 
@@ -25,51 +29,66 @@ Extraction of the player information occurs by a series of detection followed by
 - [x] Multi Threaded Inference
 
 ## <div align="center">Demo</div>
+
  <p>
    <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
 </p>
 
 ## <div>Install</div>
+
 #### <div>Requirements</div>
+
 - Linux
 - CUDA>= 10.0
 - Python >= 3.6
 
 #### Steps
+
 1. Create a virtual conda environment and activate it.
 
 ```bash
 conda create -n scorewatch python=3.9 -y
 conda activate scorewatch
 ```
+
 2. Install Pytorch
+
 ```bash
 conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
 ```
 
 4. Install onnxruntime-gpu. Mere onnxruntime will be slow.
+
 ```bash
 pip install onnxruntime-gpu
 ```
+
 5. Clone the repository
+
 ```bash
 git clone https://github.com/StanlyHardy/score_watch # clone
 cd score_watch
 ```
+
 6. Install other requirements
+
 ```bash
 pip install -r requirements.txt # install
 ```
 
-
 ## <div >Inference</div>
-Inference could run either on Video or Image streams.  The configuration could be changed via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please change the input paths of `video` or `images`.
+
+Inference could run either on Video or Image streams. The configuration could be changed
+via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset
+and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please
+change the input paths of `video` or `images`.
+
 ```
 python app.py 
 ```
 
-
 ## <div >App Configuration</div>
+
 <details>
  <summary>App configuration(click to expand)</summary>
 <table>
@@ -176,8 +195,9 @@ python app.py
 - [ ] Implement Ball Tracking.
 
 ## <div >Acknowledgements</div>
-* [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp; 
+
+* [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp;
 * [YOLOv5](https://github.com/ultralytics/yolov5)&nbsp;
-* [TesserOCR](https://github.com/sirfz/tesserocr)&nbsp; 
+* [TesserOCR](https://github.com/sirfz/tesserocr)&nbsp;
 * [CRNN](https://www.kaggle.com/alizahidraja/custom-ocr-crnn)&nbsp;
 * [TrOCR](https://huggingface.co/docs/transformers/model_doc/trocr)&nbsp;
