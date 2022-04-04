@@ -1,8 +1,8 @@
 <div align="center">
 
-# Sportie
+# OpenTennis
 
-Sportie is a framework under active development to analyze Tennis matches. Currently, it supports cour edge extraction, and player information extraction via scoreboard analysis.  
+OpenTennis is a framework under active development to analyze Tennis matches. Currently, it supports cour edge extraction, and player information extraction via scoreboard analysis.  
 
 [System Architecture](#system-architecture)  • 
 [Features](#features)  • 
