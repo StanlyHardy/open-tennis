@@ -1,4 +1,7 @@
+import math
+import operator
 from collections import OrderedDict
+from functools import reduce
 
 import cv2
 import numpy as np
@@ -118,13 +121,18 @@ class ScoreDetector(ModelManager):
                 pass
             else:
                 court_yard[current_label] = [(x1, y1), (x2, y2)]
-                court_yard_centroids[current_label] = [((x1 + x2) // 2, (y1 + y2) // 2)]
+                court_yard_centroids[current_label] = [(x1 + x2) // 2, (y1 + y2) // 2]
         sorted_centroids = OrderedDict(sorted(court_yard_centroids.items()))
         current_src, missing_points = self._regulate_coordinates(court_yard_centroids)
 
         if len(missing_points) <= 2:
+            s_cent_list = list(sorted_centroids.values())
+            center = tuple(
+                map(operator.truediv, reduce(lambda x, y: map(operator.add, x, y), s_cent_list), [len(s_cent_list)] * 2))
+            s_cent_list = sorted(s_cent_list, key=lambda coord: (-180 - math.degrees(
+                math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360)
             dst_pts = []
-            for k, centroid in sorted_centroids.items():
+            for centroid in s_cent_list :
                 dst_pts.append(centroid)
             current_tx, _ = cv2.findHomography(np.float32(current_src), np.float32(dst_pts))
             final_pts = []
