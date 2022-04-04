@@ -26,7 +26,7 @@ class ResultCoordinator(object):
         data_dict["bbox"] = bbox
         self.buff_repo[str(frame_count)] = data_dict
 
-    def persist(self, path ,gt_annotation: dict, total_frame_count=0):
+    def persist(self, path, gt_annotation: dict, total_frame_count=0):
         """
         Persist the data to a json file and evaluate further.
         :param gt_annotation: ground truth annotation

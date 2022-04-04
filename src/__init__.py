@@ -1,12 +1,15 @@
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+from notificationcenter import NotificationCenter
 
 from src.controllers.ocr import crnn
 from src.controllers.ocr.crnn import alphabets
 from src.utils.app_utils import AppUtils
-from src.utils.result_coord import ResultCoordinator
 from src.utils.renderer import Renderer
+from src.utils.result_coord import ResultCoordinator
 
 ROOT_DIR = Path(__file__).parents[1]
 CONFIG_DIR = os.path.join(ROOT_DIR, "assets/configs")
@@ -32,8 +35,10 @@ class AppContext(object):
     text_rec_config.preprocessing.alphabets = alphabets.alphabet
     text_rec_config.model.num_classes = len(text_rec_config.preprocessing.alphabets)
 
-    render = Renderer(app_profile)
+    renderer = Renderer(app_profile)
     result_coordinator = ResultCoordinator()
     total_frame_count = 0
+    notif_center = NotificationCenter()
+    scoreboard_result, court_points = None, None
 
-
+    executor = ThreadPoolExecutor()

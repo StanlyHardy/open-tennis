@@ -1,22 +1,22 @@
 # AppLevel Configurations
 paths:
-  video_path: "~/Datasets/Tennis/top-100-shots-rallies-2018-atp-season.mp4" # Path of the video
+  video_path: "~/Datasets/Tennis/Videos/Brutal Tennis Rallies _ THE BEST OF _ ATP.mp4" # Path of the video
   img_path: "~/Datasets/Tennis/images/test/images/" # Dir of test images if evaluation is turned on
   players_path: "assets/data/gt/players.csv"
   groundtruth_path: "~/Datasets/Tennis/groundtruth.json"
   output_video_path: "~/Datasets/Tennis/Debug/export.mp4"
-  logs_path : "~/Datasets/Tennis/Debug/result.json"
+  logs_path: "~/Datasets/Tennis/Debug/result.json"
 streamer:
-  should_draw : true # Draws the result if enabled
-  view_imshow : true
-  save_stream : false
-  debug : false # turn on or off debug logs
-  evaluation : false # Calculates the average matching names, scores, serving player over the test dataset.
+  should_draw: true # Draws the result if enabled
+  view_imshow: true
+  save_stream: false
+  debug: false # turn on or off debug logs
+  evaluation: false # Calculates the average matching names, scores, serving player over the test dataset.
 # Model Paths
 models:
   score_det_model: "assets/models/detector.engine" # Model path of the Detector
-  detector_config : "assets/configs/detector_config.yaml"
-  text_rec_model : "assets/models/text_rec_revamped.pth" # Model path of CRNN
-  text_rec_config : "assets/configs/text_rec_config.yaml"
-  ocr_engine : "CRNN" # CRNN or PyTesseract
+  detector_config: "assets/configs/detector_config.yaml"
+  text_rec_model: "assets/models/text_rec_revamped.pth" # Model path of CRNN
+  text_rec_config: "assets/configs/text_rec_config.yaml"
+  ocr_engine: "CRNN" # CRNN or PyTesseract
 

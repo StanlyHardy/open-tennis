@@ -1,5 +1,3 @@
-import os.path
-
 import cv2
 
 from src import AppContext

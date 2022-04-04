@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import cv2
 import numpy as np
 import torch
@@ -5,6 +7,7 @@ import torch
 from src.controllers.detector.detector_utils import letterbox, non_max_suppression, scale_coords
 from src.controllers.model_manager import ModelManager
 from src.utils.daos import InputFrame, ScoreBoard
+from src.utils.math_utils import MathUtils
 
 
 class ScoreDetector(ModelManager):
@@ -14,6 +17,16 @@ class ScoreDetector(ModelManager):
 
     def __init__(self):
         super().__init__()
+        self.all_labels = self.detector_config["model"]["class_labels"]
+        self.colors = [(220, 155, 3), (123, 137, 0), (92, 24, 194), (0, 145, 255), (7, 193, 255),
+                       (12, 132, 31), (25, 12, 0), (29, 24, 213), (21, 164, 32), (123, 41, 42)]
+        self.reference_keys = [str(i + 1) for i in range(6)]
+
+        self.reference_pts = [336, 833, 492, 835, 962, 833, 1430, 835, 1584, 833, 597, 571, 960, 571, 1313, 571, 729,
+                              272, 957, 276, 1182, 274, 692, 203, 756, 206, 1153, 210, 1218, 206]
+        self.reference_pts = MathUtils.group_pts(self.reference_pts, 2)
+        self.src = [602, 570, 960, 572, 1313, 574, 1180, 275, 957, 275, 728, 275]
+        self.src = MathUtils.group_pts(self.src, 2)
 
     def normalize(self, img):
         """
@@ -51,6 +64,24 @@ class ScoreDetector(ModelManager):
         pred = pred.cpu().numpy()
         return pred
 
+    def _regulate_coordinates(self, centroids):
+        """
+        Remove the missing indices from the src points
+        @param centroids: detected centroids of the centers of the court
+        @return: current source point and the missing point indices list
+        """
+        present_keys = list(centroids.keys())
+
+        missing_points = set(self.reference_keys).difference(set(present_keys))
+        missing_points = [int(i) for i in missing_points]
+        current_src = self.src
+        if 0 < len(missing_points) <= 2:
+            current_src = []
+            for src_key, src_pt in enumerate(self.src):
+                if int(src_key) + 1 not in missing_points:
+                    current_src.append(src_pt)
+        return [current_src, missing_points]
+
     def post_process(self, pred, processed_image, original_img, frame_count):
         """
         Post process the detected result and pass it to the player information extractor
@@ -69,22 +100,46 @@ class ScoreDetector(ModelManager):
         boxes = output[:, :4]
         scores = output[:, 4]
         classes = output[:, 5]
-        h, w = original_img.shape[:2]
-        tl = round(0.002 * (w + h) / 2) + 1
+        court_yard = {}
+        court_yard_centroids = {}
+        if len(boxes) == 0:
+            self.notif_center.post_notification(sender=self.__class__.__name__,
+                                                with_name="ScoreManager", with_info=None)
         for box, score, c in zip(boxes, scores, classes):
             top_left, bottom_right = box[:2].astype(np.int64).tolist(), box[2:4].astype(np.int64).tolist()
-
+            current_label = self.all_labels[int(c)]
             x1, y1, x2, y2 = top_left[0], top_left[1], bottom_right[0], bottom_right[1]
-            cropped_image = original_img[y1:y2, x1:x2]
-            scoreboard = ScoreBoard(cropped_image, frame_count, box, original_img)
-            self.text_recognizer.recognize(scoreboard)
+            if current_label == "scoreboard":
+                if score > 0.90:
+                    cropped_image = original_img[y1:y2, x1:x2]
+                    scoreboard = ScoreBoard(cropped_image, frame_count, box, original_img)
+                    self.text_recognizer.recognize(scoreboard)
+            elif current_label == "central":
+                # TODO Run keypoint search algorithm over the central patch for added verification.
+                pass
+            elif current_label == "ball":
+                # TODO Trigger ball tracking.
+                pass
+            else:
+                court_yard[current_label] = [(x1, y1), (x2, y2)]
+                court_yard_centroids[current_label] = [((x1 + x2) // 2, (y1 + y2) // 2)]
+        sorted_centroids = OrderedDict(sorted(court_yard_centroids.items()))
+        current_src, missing_points = self._regulate_coordinates(court_yard_centroids)
 
-            self.render.rect(
-                original_img, (x1, y1), (x2, y2),
-                thickness=max(
-                    int((w + h) / 600), 1)
-            )
-            self.render.text(original_img, "scoreboard", (x1 + 3, y1 - 4), 0, tl / 3)
+        if len(missing_points) <= 2:
+            dst_pts = []
+            for k, centroid in sorted_centroids.items():
+                dst_pts.append(centroid)
+            current_tx, _ = cv2.findHomography(np.float32(current_src), np.float32(dst_pts))
+            final_pts = []
+            for pt in self.reference_pts:
+                res = MathUtils.apply_tx(pt, current_tx)
+                final_pts.append((int(res[0]), int(res[1])))
+            self.notif_center.post_notification(sender=self.__class__.__name__,
+                                                with_name="TxPoints", with_info=final_pts)
+        else:
+            self.notif_center.post_notification(sender=self.__class__.__name__,
+                                                with_name="TxPoints", with_info=None)
 
     def detect(self, data: InputFrame):
         """

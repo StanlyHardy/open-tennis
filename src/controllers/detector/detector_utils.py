@@ -1,8 +1,8 @@
 import time
 
 import cv2
-import torch
 import numpy as np
+import torch
 
 
 def letterbox(im, new_shape=(640, 640), color=(114, 114, 114), auto=True, scaleFill=False, scaleup=True, stride=32):

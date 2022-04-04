@@ -1,75 +1,102 @@
-## <div align="center">Scoreboard Watcher</div>
+<div align="center">
 
-<p align="center">
- Extraction of the player information occurs by a series of detection followed by text recognition.  Utilized both PyTesseract and CRNN for player information extraction. <a href="https://developer.nvidia.com/tensorrt">TensorRT</a> has been utilized for detection.TensorRt Version of Scoreboard Watcher spikes up the performance 2x times. The results are post-processed before dispatching them to the evaluator. </p>
+# Sportie
+
+Sportie is a framework under active development to analyze Tennis matches. Currently, it supports cour edge extraction, and player information extraction via scoreboard analysis. More features will be added as time flies by. 
+
+[System Architecture](#system-architecture)  • 
+[Features](#features)  • 
+ [Demo](#demo)  • 
+[Installation](#installation)  • 
+[Inference](#inference)  • 
+[Configurations](#configurations)  • 
+[Roadmap](#roadmap)
+ 
+</div>
 
 ## <div align="center">System Architecture</div>
+
  <p>
-   <img  src="https://github.com/StanlyHardy/score_watch/blob/experimental/assets/graphics/sys_arch.png"></a>
+   <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/graphics/system_arch.png"></a>
 </p>
 
-## <div align="center">How it works?</div>
-- There can be either an Image session or a Video Playback session. Both sessions are bound to session context.
-- The Score Manager retrieves the frames from the session context and dispatches them to detection.
-- After an initial warm-up epoch, the model is ready for inference via ONNXRuntime over the incoming frames and passes the result to OCRRoot. 
-- The OCRRoot uses either the TessarOCR or CRNN for Player information extraction. The recognized noisy labels get sanitized before passing them to the coordinator. Renderer could be utilized to draw results.
-- The Result Coordinator coordinates the result for further evaluation during the image playback session. 
-
 ## <div align="center">Features</div>
-
+- [x] Court Edge Detection
 - [x] Recognize the Player Names.
 - [x] Determine the scores.
 - [x] Find the current serving player.
 - [x] Evaluate the average correct match.
+
 ## <div align="center">Demo</div>
+
  <p>
    <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
 </p>
 
-## <div>Install</div>
+
+## <div align="center">Installation</div>
 #### <div>Requirements</div>
 - Linux
 - CUDA>= 10.0
 - Python >= 3.6
 
 #### Steps
+
 1. Create a virtual conda environment and activate it.
 
 ```bash
 conda create -n scorewatch python=3.9 -y
 conda activate scorewatch
 ```
+
 2. Install Pytorch
+
 ```bash
 conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
 ```
 
 4. Install TensorRT
+
 ```bash
 pip install -U nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com
 ```
+
 5. Clone the repository
+
 ```bash
 git clone https://github.com/StanlyHardy/score_watch # clone
 cd score_watch
 ```
+
 6. Install other requirements
+
 ```bash
 pip install -r requirements.txt # install
 ```
 7. The provided `.engine` file is platform specifc. So, export `detector.pt` within `assets/models` to TensorRT engine using the official <a href="https://github.com/ultralytics/yolov5/blob/master/export.py">exporter </a>. 
 
-## <div >Inference</div>
-Inference could run either on Video or Image streams.  The configuration could be changed via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please change the input paths of `video` or `images`.
+## <div align="center">Inference</div>
+
+Inference could run either on Video or Image streams. The configuration could be changed
+via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset
+and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please
+change the input paths of `video` or `images`.
+
 ```
 python app.py 
 ```
 
+## <div align="center">Configurations</div>
 
-## <div >App Configuration</div>
 <details>
  <summary>App configuration(click to expand)</summary>
+  <br>
 <table>
+ <tr>
+    <th>Section</th>
+    <th>Feature</th>
+    <th>Description</th>
+  </tr>
  <tr>
   <td rowspan="6">&nbsp; Paths </td>
   <td>&nbsp; <code>video_path</code></td>
@@ -119,7 +146,6 @@ python app.py
  <td rowspan="5">&nbsp; Models </td>
   <td>&nbsp; <code>score_det_model'</code></td>
   <td>&nbsp; Path of the score detector model.</td>
- </tr>
  <tr>
   <td>&nbsp;<code>detector_config</code></td>
   <td>&nbsp; Path of the config file for the score detector. </td>
@@ -140,7 +166,13 @@ python app.py
 </details>
 <details>
  <summary>Detector Configuration(click to expand)</summary>
+ <br>
 <table>
+ <tr>
+    <th>Section</th>
+    <th>Feature</th>
+    <th>Description</th>
+  </tr>
  <tr>
   <td rowspan="5">&nbsp; YOLOv5 </td>
   <td>&nbsp; <code>execution_env</code></td>
@@ -166,16 +198,18 @@ python app.py
 </table>
 </details>
 
-## <div>Roadmap</div>
-- [ ] Quantize the model
-- [ ] Multi Threaded Inference
-- [ ] Train CRNN with wide set of Data.
-- [ ] Compute Precision/Recall for evaluation.
-- [ ] Gauge Attention OCR / Transformer architectures
+## <div align="center">Roadmap</div>
 
-## <div >Acknowledgements</div>
-* [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp; 
+- [ ] Train CRNN with wide set of Data from ATP/Wimbledon matches.
+- [ ] Implement Ball Tracking, Trajectory Analysis
+- [ ] Player tracking.
+- [ ] Predict the style and the outcome of shot
+- [ ] Player activity analysis
+
+
+## <div align="center">Acknowledgement</div>
+
+* [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp;
 * [YOLOv5](https://github.com/ultralytics/yolov5)&nbsp;
-* [TesserOCR](https://github.com/sirfz/tesserocr)&nbsp; 
+* [TesserOCR](https://github.com/sirfz/tesserocr)&nbsp;
 * [CRNN](https://www.kaggle.com/alizahidraja/custom-ocr-crnn)&nbsp;
-* [TrOCR](https://huggingface.co/docs/transformers/model_doc/trocr)&nbsp;

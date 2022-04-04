@@ -1,5 +1,9 @@
 import cv2
 import numpy as np
+from PIL import Image
+from PIL import ImageDraw
+
+from src.utils.daos import Result
 
 
 class Renderer(object):
@@ -9,6 +13,7 @@ class Renderer(object):
 
     def __init__(self, app_profile):
         self.should_draw = app_profile["streamer"]["should_draw"]
+        self.tl, self.h, self.w = 0, 0, 0
 
     def draw_canvas(self, drawable_frame: np.ndarray, output_vis: np.ndarray, alpha=0.4):
         """
@@ -66,3 +71,97 @@ class Renderer(object):
         if self.should_draw:
             cv2.rectangle(image, pt1, pt2, color, thickness=thickness, lineType=lineType)
         return image
+
+    def render_result(self, det_frame, result: Result):
+        """
+        :param det_frame: Scoreboard object with its metadata
+        :param result: Processed result
+        """
+        if self.tl == 0:
+            self.h, self.w = det_frame.shape[:2]
+        det_frame = \
+            self.draw_canvas(det_frame.copy(), det_frame)
+
+        det_frame = \
+            self.draw_canvas(det_frame.copy(), det_frame)
+
+        x1, y1, x2, y2 = map(int, result.score_board.bbox)
+        self.text(det_frame, "scoreboard", (x1 + 3, y1 - 4), 0, self.tl / 3)
+        self.rect(
+            det_frame, (x1, y1), (x2, y2),
+            thickness=max(
+                int((self.w + self.h) / 600), 1)
+        )
+        self.text(det_frame, "Player 1: {}".format(result.name_1.title()),
+                  coordinate=(870, 940))
+        if len(result.score_1) > 0:
+            self.text(det_frame, "Score:    {}".format(result.score_1),
+                      coordinate=(870, 980))
+        else:
+            self.text(det_frame, "Score:    {}".format("Recognizing"),
+                      coordinate=(870, 980))
+
+        self.text(det_frame, "Player 2: {}".format(result.name_2.title()),
+                  coordinate=(1370, 940))
+        if len(result.score_2) > 0:
+            self.text(det_frame, "Score:    {}".format(result.score_2),
+                      coordinate=(1370, 990))
+        else:
+            self.text(det_frame, "Score:    {}".format("Recognizing"),
+                      coordinate=(1370, 990))
+
+        if result.serving_player == "unknown":
+            draw_text = "Recognizing..."
+        elif result.serving_player == "name_1":
+            draw_text = result.name_1.title()
+        else:
+            draw_text = result.name_2.title()
+
+        self.text(det_frame, "Serving Player: {}".format(draw_text),
+                  coordinate=(880, 870))
+
+    def convert_from_cv2_to_image(self, img: np.ndarray) -> Image:
+        """
+
+        @param img: input OpenCv image
+        @return: PIL Image
+        """
+
+        return Image.fromarray(img)
+
+    def render_court_points(self, original_img, final_pts) -> np.ndarray:
+        """
+
+        @param original_img: input image that shall be used as a canvas
+        @param final_pts: final points that is obtained via homography
+        @return:
+        """
+
+        pil_img = self.convert_from_cv2_to_image(original_img)
+        image_draw = ImageDraw.ImageDraw(pil_img)
+        image_draw.line([final_pts[6], final_pts[9]], fill=(120, 0, 255, 255), width=20)
+
+        image_draw.line((final_pts[1], final_pts[5],
+                         final_pts[8], final_pts[12]),
+                        fill=(0, 120, 255, 255), width=20)
+
+        image_draw.line((final_pts[3], final_pts[7],
+                         final_pts[10], final_pts[13]),
+                        fill=(0, 120, 255, 255), width=20)
+
+        image_draw.line((final_pts[5], final_pts[6],
+                         final_pts[7]),
+                        fill=(0, 120, 255, 255), width=20)
+        image_draw.line((final_pts[8], final_pts[9],
+                         final_pts[10]),
+                        fill=(0, 120, 255, 255), width=20)
+
+        image_draw.line(((final_pts[0][0] - 10, final_pts[0][1]), final_pts[1],
+                         final_pts[2], final_pts[3], (final_pts[4][0] + 10, final_pts[4][1]),
+                         final_pts[0], final_pts[11], (final_pts[12][0] - 10, final_pts[12][1]), final_pts[13]
+                         , final_pts[14], final_pts[4]),
+                        fill=(255, 102, 168, 255), width=20)
+
+        np_image = np.array(pil_img)
+
+        return np_image

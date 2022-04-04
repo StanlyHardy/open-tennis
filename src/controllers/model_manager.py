@@ -1,16 +1,14 @@
 import math
+from collections import OrderedDict, namedtuple
 
 import numpy as np
+import tensorrt as trt
 import torch
 
 from src import AppContext
-
 from src.controllers.ocr.dl_txt_recognizer import DLTextRecognizer
 from src.controllers.ocr.ocr_core import OCRCore
 from src.controllers.ocr.tesseract_ocr import TesserTextRecognizer
-import tensorrt as trt
-
-from collections import OrderedDict, namedtuple
 
 
 class ModelManager(AppContext):

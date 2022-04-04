@@ -1,5 +1,6 @@
-import numpy as np
 from dataclasses import dataclass
+
+import numpy as np
 
 
 @dataclass
@@ -22,6 +23,12 @@ class ScoreBoard:
     frame_count: int
     bbox: np.ndarray
     raw_img: np.ndarray
+
+
+@dataclass
+class CourtYard:
+    bboxes: dict
+    centroids: dict
 
 
 @dataclass
