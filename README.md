@@ -2,7 +2,7 @@
 
 # Sportie
 
-Sportie is a framework under active development to analyze Tennis matches. Currently, it supports cour edge extraction, and player information extraction via scoreboard analysis. More features will be added as time flies by. 
+Sportie is a framework under active development to analyze Tennis matches. Currently, it supports cour edge extraction, and player information extraction via scoreboard analysis.  
 
 [System Architecture](#system-architecture)  • 
 [Features](#features)  • 
