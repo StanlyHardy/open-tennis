@@ -30,7 +30,7 @@ Sportie is a framework under active development to analyze Tennis matches. Curre
 ## <div align="center">Demo</div>
 
  <p>
-   <img  src="https://github.com/StanlyHardy/score_watch/blob/scoreboard_dev/assets/demo/1.jpg">
+   <img  src="https://github.com/StanlyHardy/score_watch/blob/experimental/assets/demo/demo1.png">
 </p>
 
 
