@@ -20,3 +20,7 @@ models:
   text_rec_config: "assets/configs/text_rec_config.yaml"
   ocr_engine: "CRNN" # CRNN or PyTesseract
 
+thresholds:
+  ref_points : [336, 833, 492, 835, 962, 833, 1430, 835, 1584, 833, 597, 571, 960, 571, 1313, 571, 729,
+                              272, 957, 276, 1182, 274, 692, 203, 756, 206, 1153, 210, 1218, 206]
+  src_points : [602, 570, 960, 572, 1313, 574, 1180, 275, 957, 275, 728, 275]

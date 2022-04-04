@@ -18,15 +18,11 @@ class ScoreDetector(ModelManager):
     def __init__(self):
         super().__init__()
         self.all_labels = self.detector_config["model"]["class_labels"]
-        self.colors = [(220, 155, 3), (123, 137, 0), (92, 24, 194), (0, 145, 255), (7, 193, 255),
-                       (12, 132, 31), (25, 12, 0), (29, 24, 213), (21, 164, 32), (123, 41, 42)]
+
         self.reference_keys = [str(i + 1) for i in range(6)]
 
-        self.reference_pts = [336, 833, 492, 835, 962, 833, 1430, 835, 1584, 833, 597, 571, 960, 571, 1313, 571, 729,
-                              272, 957, 276, 1182, 274, 692, 203, 756, 206, 1153, 210, 1218, 206]
-        self.reference_pts = MathUtils.group_pts(self.reference_pts, 2)
-        self.src = [602, 570, 960, 572, 1313, 574, 1180, 275, 957, 275, 728, 275]
-        self.src = MathUtils.group_pts(self.src, 2)
+        self.reference_pts = MathUtils.group_pts(self.app_profile.thresholds.ref_points, 2)
+        self.src = MathUtils.group_pts(self.app_profile.thresholds.src_points, 2)
 
     def normalize(self, img):
         """
