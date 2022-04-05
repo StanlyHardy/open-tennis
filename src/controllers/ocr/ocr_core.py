@@ -3,7 +3,7 @@ import difflib
 import numpy as np
 
 from src import AppContext
-from src.utils.daos import ScoreBoard, Result
+from src.utils.daos import Result, ScoreBoard
 
 
 class OCRCore(AppContext):

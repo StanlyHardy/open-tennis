@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
-from PIL import Image
-from PIL import ImageDraw
+from PIL import Image, ImageDraw
 
 from src.utils.daos import Result
 

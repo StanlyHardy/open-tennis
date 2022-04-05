@@ -7,7 +7,9 @@ import cv2
 import numpy as np
 import torch
 
-from src.controllers.detector.detector_utils import letterbox, non_max_suppression, scale_coords
+from src.controllers.detector.detector_utils import (letterbox,
+                                                     non_max_suppression,
+                                                     scale_coords)
 from src.controllers.model_manager import ModelManager
 from src.utils.daos import InputFrame, ScoreBoard
 from src.utils.math_utils import MathUtils

@@ -3,8 +3,7 @@ import numpy as np
 import torch
 from torch.autograd import Variable
 
-from src.controllers.ocr.crnn import crnn
-from src.controllers.ocr.crnn import ocr_utils
+from src.controllers.ocr.crnn import crnn, ocr_utils
 from src.controllers.ocr.ocr_core import OCRCore
 from src.utils.daos import ScoreBoard
 
