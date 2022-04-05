@@ -103,7 +103,7 @@ class ScoreDetector(ModelManager):
         court_yard_centroids = {}
         if len(boxes) == 0:
             self.notif_center.post_notification(sender=self.__class__.__name__,
-                                                with_name="ScoreManager", with_info=None)
+                                                with_name="OpenTennis", with_info=None)
         for box, score, c in zip(boxes, scores, classes):
             top_left, bottom_right = box[:2].astype(np.int64).tolist(), box[2:4].astype(np.int64).tolist()
             current_label = self.all_labels[int(c)]

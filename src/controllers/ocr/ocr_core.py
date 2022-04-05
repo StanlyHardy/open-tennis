@@ -73,7 +73,7 @@ class OCRCore(AppContext):
                         score_1=result["score_1"],
                         score_2=result["score_2"])
         self.notif_center.post_notification(sender=self.__class__.__name__,
-                                            with_name="ScoreManager", with_info=result)
+                                            with_name="OpenTennis", with_info=result)
         if self.app_profile["streamer"]["evaluation"]:
             if str(score_board.frame_count) in self.gt_ann.keys():
                 self.result_coordinator.store(result)

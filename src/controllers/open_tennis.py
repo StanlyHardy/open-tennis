@@ -11,9 +11,9 @@ from src.session.videostreamer import VideoStreamer
 from src.utils.daos import InputFrame, Result
 
 
-class ScoreManager(AppContext):
+class OpenTennis(AppContext):
     """
-    ScoreManager binds itself with the session
+    OpenTennis binds itself with the session
     and dispatches them to the processors that analyses the frame.
     """
 
@@ -26,7 +26,7 @@ class ScoreManager(AppContext):
         else:
             self.session = VideoStreamer()
         self.observer = self.notif_center.add_observer(with_block=self.detection_result,
-                                                       for_name="ScoreManager")
+                                                       for_name="OpenTennis")
         self.observer = self.notif_center.add_observer(with_block=self.detection_result,
                                                        for_name="TxPoints")
         if self.app_profile["streamer"]["save_stream"]:
@@ -34,7 +34,7 @@ class ScoreManager(AppContext):
                                        cv2.VideoWriter_fourcc(*'MP4V'), 25, (self.session.width, self.session.height))
 
     def detection_result(self, sender, event_name, result: Result):
-        if event_name == "ScoreManager":
+        if event_name == "OpenTennis":
             self.scoreboard_result = result
         elif event_name == "TxPoints":
             self.court_points = result

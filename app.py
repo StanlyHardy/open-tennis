@@ -1,11 +1,11 @@
-from src.controllers.score_manager import ScoreManager
+from src.controllers.open_tennis import OpenTennis
 
 
 def main():
     """
-    Trigger the Scoremanager which again sequentially invokes other modules for the player recognition.
+    Trigger the OpenTennis which again sequentially invokes other modules for the player recognition.
     """
-    ScoreManager().run()
+    OpenTennis().run()
 
 
 if __name__ == '__main__':
