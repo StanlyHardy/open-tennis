@@ -25,13 +25,19 @@ class OpenTennis(AppContext):
             self.session = ImageStreamer()
         else:
             self.session = VideoStreamer()
-        self.observer = self.notif_center.add_observer(with_block=self.detection_result,
-                                                       for_name="OpenTennis")
-        self.observer = self.notif_center.add_observer(with_block=self.detection_result,
-                                                       for_name="TxPoints")
+        self.observer = self.notif_center.add_observer(
+            with_block=self.detection_result, for_name="OpenTennis"
+        )
+        self.observer = self.notif_center.add_observer(
+            with_block=self.detection_result, for_name="TxPoints"
+        )
         if self.app_profile["streamer"]["save_stream"]:
-            self.out = cv2.VideoWriter(os.path.expanduser(self.app_profile["paths"]["output_video_path"]),
-                                       cv2.VideoWriter_fourcc(*'MP4V'), 25, (self.session.width, self.session.height))
+            self.out = cv2.VideoWriter(
+                os.path.expanduser(self.app_profile["paths"]["output_video_path"]),
+                cv2.VideoWriter_fourcc(*"MP4V"),
+                25,
+                (self.session.width, self.session.height),
+            )
 
     def detection_result(self, sender, event_name, result: Result):
         if event_name == "OpenTennis":
@@ -42,7 +48,6 @@ class OpenTennis(AppContext):
             self.scoreboard_result, self.court_points = None, None
 
     def run(self):
-
         """
         Retrieves the frames from the session and passes it forward to do recognition.
         """
@@ -51,10 +56,14 @@ class OpenTennis(AppContext):
             self.session.update()
             det_frame = self.session.detection_frame
 
-            self.score_detector.detect(InputFrame(det_frame, self.session.frame_count, False))
+            self.score_detector.detect(
+                InputFrame(det_frame, self.session.frame_count, False)
+            )
 
             if self.court_points is not None:
-                det_frame = self.renderer.render_court_points(det_frame, self.court_points)
+                det_frame = self.renderer.render_court_points(
+                    det_frame, self.court_points
+                )
             if self.scoreboard_result is not None:
                 # TODO PIL based rendering
                 self.renderer.render_result(det_frame, self.scoreboard_result)
@@ -68,7 +77,15 @@ class OpenTennis(AppContext):
         """
         Warm up since the first few frames tends to be slow
         """
-        for i in tqdm(range(self.detector_config["model"]["warm_up"]), desc="Warming up..."):
-            blank_frame = np.zeros((self.detector_config["model"]["img_size"],
-                                    self.detector_config["model"]["img_size"], 3), np.uint8)
+        for i in tqdm(
+            range(self.detector_config["model"]["warm_up"]), desc="Warming up..."
+        ):
+            blank_frame = np.zeros(
+                (
+                    self.detector_config["model"]["img_size"],
+                    self.detector_config["model"]["img_size"],
+                    3,
+                ),
+                np.uint8,
+            )
             self.score_detector.detect(InputFrame(blank_frame, 0, True))

@@ -16,17 +16,21 @@ class DLTextRecognizer(OCRCore):
     def __init__(self):
         super().__init__()
 
-        self.device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
+        self.device = (
+            torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+        )
 
         self.text_rec_model = crnn.get_crnn(self.text_rec_config).to(self.device)
 
         checkpoint = torch.load(self.app_profile["models"]["text_rec_model"])
-        if 'state_dict' in checkpoint.keys():
-            self.text_rec_model.load_state_dict(checkpoint['state_dict'])
+        if "state_dict" in checkpoint.keys():
+            self.text_rec_model.load_state_dict(checkpoint["state_dict"])
         else:
             self.text_rec_model.load_state_dict(checkpoint)
         self.text_rec_model.eval()
-        self.converter = ocr_utils.strLabelConverter(self.text_rec_config.preprocessing.alphabets)
+        self.converter = ocr_utils.strLabelConverter(
+            self.text_rec_config.preprocessing.alphabets
+        )
 
     def _preprocess(self, patch: np.ndarray) -> torch.tensor:
         """
@@ -35,17 +39,30 @@ class DLTextRecognizer(OCRCore):
         :return:
         """
         h, w = patch.shape
-        img = cv2.resize(patch, (0, 0), fx=self.text_rec_config.model.img_size.h / h,
-                         fy=self.text_rec_config.model.img_size.h / h,
-                         interpolation=cv2.INTER_CUBIC)
+        img = cv2.resize(
+            patch,
+            (0, 0),
+            fx=self.text_rec_config.model.img_size.h / h,
+            fy=self.text_rec_config.model.img_size.h / h,
+            interpolation=cv2.INTER_CUBIC,
+        )
         h, w = img.shape
         w_cur = int(
-            img.shape[1] / (self.text_rec_config.model.img_size.ow / self.text_rec_config.model.img_size.w))
-        img = cv2.resize(img, (0, 0), fx=w_cur / w, fy=1.0, interpolation=cv2.INTER_CUBIC)
+            img.shape[1]
+            / (
+                self.text_rec_config.model.img_size.ow
+                / self.text_rec_config.model.img_size.w
+            )
+        )
+        img = cv2.resize(
+            img, (0, 0), fx=w_cur / w, fy=1.0, interpolation=cv2.INTER_CUBIC
+        )
         img = np.reshape(img, (self.text_rec_config.model.img_size.h, w_cur, 1))
 
         img = img.astype(np.float32)
-        img = (img / 255. - self.text_rec_config.preprocessing.mean) / self.text_rec_config.preprocessing.std
+        img = (
+            img / 255.0 - self.text_rec_config.preprocessing.mean
+        ) / self.text_rec_config.preprocessing.std
         img = img.transpose([2, 0, 1])
 
         img = torch.from_numpy(img)
@@ -96,6 +113,8 @@ class DLTextRecognizer(OCRCore):
         :param score_board: Scoreboard that has got the player data.
         """
         score_board_img = cv2.cvtColor(score_board.image.copy(), cv2.COLOR_BGR2GRAY)
-        score_board_img = cv2.threshold(score_board_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)[1]
+        score_board_img = cv2.threshold(
+            score_board_img, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
+        )[1]
         patches = self._divide_image(score_board_img)
         self._analyze(patches, score_board)

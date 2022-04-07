@@ -16,7 +16,7 @@ class strLabelConverter(object):
         self._ignore_case = ignore_case
         if self._ignore_case:
             alphabet = alphabet.lower()
-        self.alphabet = alphabet + '-'  # for `-1` index
+        self.alphabet = alphabet + "-"  # for `-1` index
 
         self.dict = {}
         for i, char in enumerate(alphabet):
@@ -41,7 +41,7 @@ class strLabelConverter(object):
         for item in text:
 
             if decode_flag:
-                item = item.decode('utf-8', 'strict')
+                item = item.decode("utf-8", "strict")
             length.append(len(item))
             for char in item:
                 index = self.dict[char]
@@ -64,26 +64,32 @@ class strLabelConverter(object):
         """
         if length.numel() == 1:
             length = length[0]
-            assert t.numel() == length, "text with length: {} does not match declared length: {}".format(t.numel(),
-                                                                                                         length)
+            assert (
+                t.numel() == length
+            ), "text with length: {} does not match declared length: {}".format(
+                t.numel(), length
+            )
             if raw:
-                return ''.join([self.alphabet[i - 1] for i in t])
+                return "".join([self.alphabet[i - 1] for i in t])
             else:
                 char_list = []
                 for i in range(length):
                     if t[i] != 0 and (not (i > 0 and t[i - 1] == t[i])):
                         char_list.append(self.alphabet[t[i] - 1])
-                return ''.join(char_list)
+                return "".join(char_list)
         else:
             # batch mode
-            assert t.numel() == length.sum(), "texts with length: {} does not match declared length: {}".format(
-                t.numel(), length.sum())
+            assert (
+                t.numel() == length.sum()
+            ), "texts with length: {} does not match declared length: {}".format(
+                t.numel(), length.sum()
+            )
             texts = []
             index = 0
             for i in range(length.numel()):
                 l = length[i]
                 texts.append(
-                    self.decode(
-                        t[index:index + l], torch.IntTensor([l]), raw=raw))
+                    self.decode(t[index : index + l], torch.IntTensor([l]), raw=raw)
+                )
                 index += l
             return texts

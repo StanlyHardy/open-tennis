@@ -6,6 +6,7 @@ class MathUtils(object):
     """
     General math resolvers.
     """
+
     @classmethod
     def group_pts(cls, input_coords, size=2):
         """
@@ -14,7 +15,9 @@ class MathUtils(object):
         @param size: size of the individual pairs.
         @return:
         """
-        return [tuple(input_coords[i:i + size]) for i in range(0, len(input_coords), size)]
+        return [
+            tuple(input_coords[i : i + size]) for i in range(0, len(input_coords), size)
+        ]
 
     @classmethod
     def apply_tx(cls, position: np.ndarray, transformation_matrix: np.ndarray):
@@ -24,6 +27,8 @@ class MathUtils(object):
         @param transformation_matrix: The transformation matrix between src and dst
         @return:
         """
-        transformed = cv2.perspectiveTransform(np.float32([position]).reshape(1, 1, 2), transformation_matrix)
+        transformed = cv2.perspectiveTransform(
+            np.float32([position]).reshape(1, 1, 2), transformation_matrix
+        )
         trans_2d_pos = transformed[0][0]
         return trans_2d_pos

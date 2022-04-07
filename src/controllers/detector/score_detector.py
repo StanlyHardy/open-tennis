@@ -7,9 +7,11 @@ import cv2
 import numpy as np
 import torch
 
-from src.controllers.detector.detector_utils import (letterbox,
-                                                     non_max_suppression,
-                                                     scale_coords)
+from src.controllers.detector.detector_utils import (
+    letterbox,
+    non_max_suppression,
+    scale_coords,
+)
 from src.controllers.model_manager import ModelManager
 from src.utils.daos import InputFrame, ScoreBoard
 from src.utils.math_utils import MathUtils
@@ -26,7 +28,9 @@ class ScoreDetector(ModelManager):
 
         self.reference_keys = [str(i + 1) for i in range(6)]
 
-        self.reference_pts = MathUtils.group_pts(self.app_profile.thresholds.ref_points, 2)
+        self.reference_pts = MathUtils.group_pts(
+            self.app_profile.thresholds.ref_points, 2
+        )
         self.src = MathUtils.group_pts(self.app_profile.thresholds.src_points, 2)
 
     def normalize(self, img):
@@ -57,11 +61,14 @@ class ScoreDetector(ModelManager):
         Returns:
 
         """
-        assert img.shape == self.bindings['images'].shape, (img.shape, self.bindings['images'].shape)
-        self.binding_addrs['images'] = int(img.data_ptr())
+        assert img.shape == self.bindings["images"].shape, (
+            img.shape,
+            self.bindings["images"].shape,
+        )
+        self.binding_addrs["images"] = int(img.data_ptr())
 
         self.context.execute_v2(list(self.binding_addrs.values()))
-        pred = self.bindings['output'].data
+        pred = self.bindings["output"].data
         pred = pred.cpu().numpy()
         return pred
 
@@ -95,7 +102,9 @@ class ScoreDetector(ModelManager):
         """
         for i, det in enumerate(pred):  # detections per image
             if det is not None and len(det):
-                det[:, :4] = scale_coords(processed_image.shape[2:], det[:, :4], original_img.shape).round()
+                det[:, :4] = scale_coords(
+                    processed_image.shape[2:], det[:, :4], original_img.shape
+                ).round()
 
         output = pred[0]
         boxes = output[:, :4]
@@ -104,16 +113,22 @@ class ScoreDetector(ModelManager):
         court_yard = {}
         court_yard_centroids = {}
         if len(boxes) == 0:
-            self.notif_center.post_notification(sender=self.__class__.__name__,
-                                                with_name="OpenTennis", with_info=None)
+            self.notif_center.post_notification(
+                sender=self.__class__.__name__, with_name="OpenTennis", with_info=None
+            )
         for box, score, c in zip(boxes, scores, classes):
-            top_left, bottom_right = box[:2].astype(np.int64).tolist(), box[2:4].astype(np.int64).tolist()
+            top_left, bottom_right = (
+                box[:2].astype(np.int64).tolist(),
+                box[2:4].astype(np.int64).tolist(),
+            )
             current_label = self.all_labels[int(c)]
             x1, y1, x2, y2 = top_left[0], top_left[1], bottom_right[0], bottom_right[1]
             if current_label == "scoreboard":
                 if score > 0.90:
                     cropped_image = original_img[y1:y2, x1:x2]
-                    scoreboard = ScoreBoard(cropped_image, frame_count, box, original_img)
+                    scoreboard = ScoreBoard(
+                        cropped_image, frame_count, box, original_img
+                    )
                     self.text_recognizer.recognize(scoreboard)
             elif current_label == "central":
                 # TODO Run keypoint search algorithm over the central patch for added verification.
@@ -130,22 +145,41 @@ class ScoreDetector(ModelManager):
         if len(missing_points) <= 2:
             s_cent_list = list(sorted_centroids.values())
             center = tuple(
-                map(operator.truediv, reduce(lambda x, y: map(operator.add, x, y), s_cent_list), [len(s_cent_list)] * 2))
-            s_cent_list = sorted(s_cent_list, key=lambda coord: (-180 - math.degrees(
-                math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360)
+                map(
+                    operator.truediv,
+                    reduce(lambda x, y: map(operator.add, x, y), s_cent_list),
+                    [len(s_cent_list)] * 2,
+                )
+            )
+            s_cent_list = sorted(
+                s_cent_list,
+                key=lambda coord: (
+                    -180
+                    - math.degrees(
+                        math.atan2(*tuple(map(operator.sub, coord, center))[::-1])
+                    )
+                )
+                % 360,
+            )
             dst_pts = []
-            for centroid in s_cent_list :
+            for centroid in s_cent_list:
                 dst_pts.append(centroid)
-            current_tx, _ = cv2.findHomography(np.float32(current_src), np.float32(dst_pts))
+            current_tx, _ = cv2.findHomography(
+                np.float32(current_src), np.float32(dst_pts)
+            )
             final_pts = []
             for pt in self.reference_pts:
                 res = MathUtils.apply_tx(pt, current_tx)
                 final_pts.append((int(res[0]), int(res[1])))
-            self.notif_center.post_notification(sender=self.__class__.__name__,
-                                                with_name="TxPoints", with_info=final_pts)
+            self.notif_center.post_notification(
+                sender=self.__class__.__name__,
+                with_name="TxPoints",
+                with_info=final_pts,
+            )
         else:
-            self.notif_center.post_notification(sender=self.__class__.__name__,
-                                                with_name="TxPoints", with_info=None)
+            self.notif_center.post_notification(
+                sender=self.__class__.__name__, with_name="TxPoints", with_info=None
+            )
 
     def detect(self, data: InputFrame):
         """
@@ -159,9 +193,12 @@ class ScoreDetector(ModelManager):
         processed_image = letterbox(data.image, new_shape=self.imgsz, auto=False)[0]
         processed_image = self.normalize(processed_image)
         pred = self.infer(processed_image)
-        pred = non_max_suppression(pred, self.detector_config["model"]["conf_thresh"],
-                                   self.detector_config["model"]["iou_thresh"],
-                                   classes=None,
-                                   agnostic=False)
+        pred = non_max_suppression(
+            pred,
+            self.detector_config["model"]["conf_thresh"],
+            self.detector_config["model"]["iou_thresh"],
+            classes=None,
+            agnostic=False,
+        )
 
         self.post_process(pred, processed_image, data.image, data.frame_count)

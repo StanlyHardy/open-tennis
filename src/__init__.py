@@ -1,3 +1,4 @@
+import abc
 import json
 import os
 from concurrent.futures import ThreadPoolExecutor
@@ -16,7 +17,7 @@ CONFIG_DIR = os.path.join(ROOT_DIR, "assets/configs")
 CONFIGURATION_FILE = os.path.join(CONFIG_DIR, "app_config.yaml")
 
 
-class AppContext(object):
+class AppContext(abc.ABC):
     # Load App Profile
     app_profile = AppUtils.load_config(CONFIGURATION_FILE)
     detector_config = AppUtils.load_config(app_profile["models"]["detector_config"])

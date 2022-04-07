@@ -26,10 +26,11 @@ class ModelManager(AppContext):
         :return:
         """
 
-        Binding = namedtuple('Binding', ('name', 'dtype', 'shape', 'data', 'ptr'))
+        Binding = namedtuple("Binding", ("name", "dtype", "shape", "data", "ptr"))
         logger = trt.Logger(trt.Logger.INFO)
-        with open(self.app_profile["models"]["score_det_model"], 'rb') as f, trt.Runtime(
-                logger) as runtime:
+        with open(
+            self.app_profile["models"]["score_det_model"], "rb"
+        ) as f, trt.Runtime(logger) as runtime:
             model = runtime.deserialize_cuda_engine(f.read())
         self.bindings = OrderedDict()
         for index in range(model.num_bindings):
@@ -37,14 +38,19 @@ class ModelManager(AppContext):
             dtype = trt.nptype(model.get_binding_dtype(index))
             shape = tuple(model.get_binding_shape(index))
             data = torch.from_numpy(np.empty(shape, dtype=np.dtype(dtype))).to(
-                self.device)
-            self.bindings[name] = Binding(name, dtype, shape, data, int(data.data_ptr()))
+                self.device
+            )
+            self.bindings[name] = Binding(
+                name, dtype, shape, data, int(data.data_ptr())
+            )
         self.binding_addrs = OrderedDict((n, d.ptr) for n, d in self.bindings.items())
         self.context = model.create_execution_context()
-        self.batch_size = self.bindings['images'].shape[0]
+        self.batch_size = self.bindings["images"].shape[0]
 
-        self.imgsz = self.check_img_size(self.detector_config["model"]["img_size"],
-                                         s=self.detector_config["model"]["stride"])
+        self.imgsz = self.check_img_size(
+            self.detector_config["model"]["img_size"],
+            s=self.detector_config["model"]["stride"],
+        )
 
     def make_divisible(self, x, divisor):
         # Returns x evenly divisible by divisor
@@ -57,7 +63,9 @@ class ModelManager(AppContext):
         else:  # list i.e. img_size=[640, 480]
             new_size = [max(self.make_divisible(x, int(s)), floor) for x in imgsz]
         if new_size != imgsz:
-            print(f'WARNING: --img-size {imgsz} must be multiple of max stride {s}, updating to {new_size}')
+            print(
+                f"WARNING: --img-size {imgsz} must be multiple of max stride {s}, updating to {new_size}"
+            )
         return new_size
 
     def load_text_recognizer(self) -> OCRCore:

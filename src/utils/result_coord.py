@@ -34,6 +34,6 @@ class ResultCoordinator(object):
         :return:
         """
         if total_frame_count:
-            with open(path, 'w') as outfile:
+            with open(path, "w") as outfile:
                 json.dump(self.buff_repo, outfile)
             self.evaluator.evaluate(self.buff_repo, gt_annotation, total_frame_count)

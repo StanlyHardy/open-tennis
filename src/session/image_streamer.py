@@ -9,7 +9,6 @@ from src.session.session_context import SessionContext
 
 
 class ImageStreamer(SessionContext):
-
     def __init__(self):
         """
         Video Playback session handler for evaluation
@@ -21,7 +20,11 @@ class ImageStreamer(SessionContext):
             exit()
         self.img_paths = glob(self.img_dir + "*.jpg")
         if len(self.img_paths) == 0:
-            print("The folder {} has got zero images.".format(os.path.expanduser(self.img_dir)))
+            print(
+                "The folder {} has got zero images.".format(
+                    os.path.expanduser(self.img_dir)
+                )
+            )
             exit()
         else:
             self.fh, self.fw, _ = cv2.imread(self.img_paths[0]).shape
@@ -29,7 +32,9 @@ class ImageStreamer(SessionContext):
         print("Input Image Path : ", self.img_dir)
 
         self.img_count = 0
-        self.img_paths = sorted(self.img_paths, key=lambda x: str(os.path.splitext(x)[0]))
+        self.img_paths = sorted(
+            self.img_paths, key=lambda x: str(os.path.splitext(x)[0])
+        )
         self.total_frame_count = len(self.img_paths)
         self.p_bar = tqdm(range(len(self.img_paths)), desc="Streaming Images...")
 
@@ -46,8 +51,11 @@ class ImageStreamer(SessionContext):
         Retrieve the frame from the disk and update the session
         """
         if self.img_count == self.total_frame_count:
-            self.result_coordinator.persist(os.path.expanduser(self.app_profile["paths"]["logs_path"]), self.gt_ann,
-                                            self.total_frame_count)
+            self.result_coordinator.persist(
+                os.path.expanduser(self.app_profile["paths"]["logs_path"]),
+                self.gt_ann,
+                self.total_frame_count,
+            )
 
             print("Completed!...")
             time.sleep(0.5)

@@ -17,12 +17,21 @@ class TesserTextRecognizer(OCRCore):
         """
         super().__init__()
         self.text_rec_config.preprocessing.ALPHABETS = alphabets.alphabet
-        self.text_rec_config.model.num_classes = len(self.text_rec_config.preprocessing.ALPHABETS)
+        self.text_rec_config.model.num_classes = len(
+            self.text_rec_config.preprocessing.ALPHABETS
+        )
 
         self.api = tesserocr.PyTessBaseAPI()
         self.symbol_pattern = re.compile("[A-Za-z0-9]+")
-        self.score_replacement = {'i': '1', 'l': '1', 'o': '0', 's': '5', 'b': '8', 'g': '6'}
-        self.name_replacement = {'5': 's', '0': 'o', '8': 'b', '6': 'g'}
+        self.score_replacement = {
+            "i": "1",
+            "l": "1",
+            "o": "0",
+            "s": "5",
+            "b": "8",
+            "g": "6",
+        }
+        self.name_replacement = {"5": "s", "0": "o", "8": "b", "6": "g"}
 
     def _preprocess(self, patch: np.ndarray) -> dict:
         """
@@ -48,11 +57,11 @@ class TesserTextRecognizer(OCRCore):
                 res.append([x, y, x + w, y + h])
         if count == 1:
             res = res[0]
-            sub_crop = thresh[res[1]:res[3], res[0]:res[2]]
+            sub_crop = thresh[res[1] : res[3], res[0] : res[2]]
             # inverted the cropped block so the bg is white and number is black.
             sub_crop = ~sub_crop
             # paste the image back to the original cropped image.
-            thresh[res[1]:res[3], res[0]:res[2]] = sub_crop
+            thresh[res[1] : res[3], res[0] : res[2]] = sub_crop
         patches = self._divide_image(thresh)
         return patches
 
@@ -100,21 +109,29 @@ class TesserTextRecognizer(OCRCore):
 
             # the score tends to have symbols sometimes. Clean such scores.
             reg_score = text[score_match_pos:]
-            score = re.sub(r'\W+', '-', reg_score)
-            score = score[:len(score) - 1]
+            score = re.sub(r"\W+", "-", reg_score)
+            score = score[: len(score) - 1]
 
             # pick the closest possible name from the stored player data
             noisy_name = text[:score_match_pos]
             if patch_position == "upper_patch":
-                result["name_1"] = self.map_literals(self.sanitize(noisy_name), self.name_replacement)
+                result["name_1"] = self.map_literals(
+                    self.sanitize(noisy_name), self.name_replacement
+                )
             else:
-                result["name_2"] = self.map_literals(self.sanitize(noisy_name), self.name_replacement)
+                result["name_2"] = self.map_literals(
+                    self.sanitize(noisy_name), self.name_replacement
+                )
 
             # determine the score
             if patch_position == "upper_patch":
-                result["score_1"] = self.map_literals(score.lower().strip(), self.score_replacement)
+                result["score_1"] = self.map_literals(
+                    score.lower().strip(), self.score_replacement
+                )
             else:
-                result["score_2"] = self.map_literals(score.lower().strip(), self.score_replacement)
+                result["score_2"] = self.map_literals(
+                    score.lower().strip(), self.score_replacement
+                )
         self.process_result(result, score_board)
 
     def recognize(self, score_board: ScoreBoard):

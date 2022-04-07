@@ -7,13 +7,12 @@ from src.utils.daos import Result, ScoreBoard
 
 
 class OCRCore(AppContext):
-
     def __init__(self):
         """
         Core OCR class that handles significant common functionalities shared by CRNN
         as well as the TesserOCR based recognizer.
         """
-        mapped_players = (map(lambda x: x.lower().strip(), self.playersLines))
+        mapped_players = map(lambda x: x.lower().strip(), self.playersLines)
         self.players = list(mapped_players)
 
     def sanitize(self, name: str) -> str:
@@ -48,7 +47,7 @@ class OCRCore(AppContext):
         lower_startx, lower_start_y = (0, h // 2)
         lower_end_x, lower_end_y = (w, h)
 
-        upper_part = buf_image[start_y:end_y + 6, start_x:end_x]
+        upper_part = buf_image[start_y : end_y + 6, start_x:end_x]
 
         lower_part = buf_image[lower_start_y:lower_end_y, lower_startx:lower_end_x]
 
@@ -66,14 +65,17 @@ class OCRCore(AppContext):
         result["frame_count"] = score_board.frame_count
         if "serving_player" not in result.keys():
             result["serving_player"] = "unknown"
-        result = Result(score_board=score_board,
-                        name_1=result["name_1"],
-                        name_2=result["name_2"],
-                        serving_player=result["serving_player"],
-                        score_1=result["score_1"],
-                        score_2=result["score_2"])
-        self.notif_center.post_notification(sender=self.__class__.__name__,
-                                            with_name="OpenTennis", with_info=result)
+        result = Result(
+            score_board=score_board,
+            name_1=result["name_1"],
+            name_2=result["name_2"],
+            serving_player=result["serving_player"],
+            score_1=result["score_1"],
+            score_2=result["score_2"],
+        )
+        self.notif_center.post_notification(
+            sender=self.__class__.__name__, with_name="OpenTennis", with_info=result
+        )
         if self.app_profile["streamer"]["evaluation"]:
             if str(score_board.frame_count) in self.gt_ann.keys():
                 self.result_coordinator.store(result)

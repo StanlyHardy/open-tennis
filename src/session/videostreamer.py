@@ -6,7 +6,6 @@ from src.session.session_context import SessionContext
 
 
 class VideoStreamer(SessionContext):
-
     def __init__(self):
         """
         Video Playback session handler
@@ -58,6 +57,6 @@ class VideoStreamer(SessionContext):
         gracefully exit the session
         :return:
         """
-        if hasattr(self, 'video'):
+        if hasattr(self, "video"):
             self.video.release()
             cv2.destroyAllWindows()

@@ -8,6 +8,7 @@ class InputFrame(object):
     """
     Input frame that has been retrieved during each session
     """
+
     image: np.ndarray
     frame_count: int
     is_warm: bool
@@ -19,6 +20,7 @@ class ScoreBoard:
     It holds the meta data of the scoreboard such as the image,
     bounding box coordinate and the original image in which it was extracted
     """
+
     image: np.ndarray
     frame_count: int
     bbox: np.ndarray
@@ -36,6 +38,7 @@ class Result:
     """
     Final result that has got the player data
     """
+
     score_board: ScoreBoard
     name_1: str
     name_2: str

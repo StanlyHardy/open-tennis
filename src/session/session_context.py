@@ -1,3 +1,5 @@
+import abc
+
 import cv2
 
 from src import AppContext
@@ -10,6 +12,25 @@ class SessionContext(AppContext):
 
     def __init__(self):
         self._frame_count = 0
+
+    @abc.abstractmethod
+    @property
+    def width(self):
+        pass
+
+    @abc.abstractmethod
+    @property
+    def height(self):
+        pass
+
+    @abc.abstractmethod
+    @property
+    def frame_count(self):
+        pass
+
+    @abc.abstractmethod
+    def _switch_off(self):
+        pass
 
     def _set_detection_frame(self, frame):
         """
@@ -33,6 +54,6 @@ class SessionContext(AppContext):
         :return:
         """
         k = cv2.waitKey(1)
-        if k == ord('q'):
+        if k == ord("q"):
             return True
         return False

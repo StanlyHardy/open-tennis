@@ -24,7 +24,7 @@ class BidirectionalLSTM(nn.Module):
 class CRNN(nn.Module):
     def __init__(self, imgH, nc, nclass, nh, n_rnn=2, leakyRelu=False):
         super(CRNN, self).__init__()
-        assert imgH % 16 == 0, 'imgH has to be a multiple of 16'
+        assert imgH % 16 == 0, "imgH has to be a multiple of 16"
 
         ks = [3, 3, 3, 3, 3, 3, 2]
         ps = [1, 1, 1, 1, 1, 1, 0]
@@ -36,34 +36,36 @@ class CRNN(nn.Module):
         def convRelu(i, batchNormalization=False):
             nIn = nc if i == 0 else nm[i - 1]
             nOut = nm[i]
-            cnn.add_module('conv{0}'.format(i),
-                           nn.Conv2d(nIn, nOut, ks[i], ss[i], ps[i]))
+            cnn.add_module(
+                "conv{0}".format(i), nn.Conv2d(nIn, nOut, ks[i], ss[i], ps[i])
+            )
             if batchNormalization:
-                cnn.add_module('batchnorm{0}'.format(i), nn.BatchNorm2d(nOut))
+                cnn.add_module("batchnorm{0}".format(i), nn.BatchNorm2d(nOut))
             if leakyRelu:
-                cnn.add_module('relu{0}'.format(i),
-                               nn.LeakyReLU(0.2, inplace=True))
+                cnn.add_module("relu{0}".format(i), nn.LeakyReLU(0.2, inplace=True))
             else:
-                cnn.add_module('relu{0}'.format(i), nn.ReLU(True))
+                cnn.add_module("relu{0}".format(i), nn.ReLU(True))
 
         convRelu(0)
-        cnn.add_module('pooling{0}'.format(0), nn.MaxPool2d(2, 2))  # 64x16x64
+        cnn.add_module("pooling{0}".format(0), nn.MaxPool2d(2, 2))  # 64x16x64
         convRelu(1)
-        cnn.add_module('pooling{0}'.format(1), nn.MaxPool2d(2, 2))  # 128x8x32
+        cnn.add_module("pooling{0}".format(1), nn.MaxPool2d(2, 2))  # 128x8x32
         convRelu(2, True)
         convRelu(3)
-        cnn.add_module('pooling{0}'.format(2),
-                       nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 256x4x16
+        cnn.add_module(
+            "pooling{0}".format(2), nn.MaxPool2d((2, 2), (2, 1), (0, 1))
+        )  # 256x4x16
         convRelu(4, True)
         convRelu(5)
-        cnn.add_module('pooling{0}'.format(3),
-                       nn.MaxPool2d((2, 2), (2, 1), (0, 1)))  # 512x2x16
+        cnn.add_module(
+            "pooling{0}".format(3), nn.MaxPool2d((2, 2), (2, 1), (0, 1))
+        )  # 512x2x16
         convRelu(6, True)  # 512x1x16
 
         self.cnn = cnn
         self.rnn = nn.Sequential(
-            BidirectionalLSTM(512, nh, nh),
-            BidirectionalLSTM(nh, nh, nclass))
+            BidirectionalLSTM(512, nh, nh), BidirectionalLSTM(nh, nh, nclass)
+        )
 
     def forward(self, input):
 
@@ -80,17 +82,20 @@ class CRNN(nn.Module):
 
 def weights_init(m):
     classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
+    if classname.find("Conv") != -1:
         m.weight.data.normal_(0.0, 0.02)
-    elif classname.find('BatchNorm') != -1:
+    elif classname.find("BatchNorm") != -1:
         m.weight.data.normal_(1.0, 0.02)
         m.bias.data.fill_(0)
 
 
 def get_crnn(config):
-    model = CRNN(config.model.img_size.h, 1,
-                 config.model.num_classes + 1,
-                 config.model.num_hidden)
+    model = CRNN(
+        config.model.img_size.h,
+        1,
+        config.model.num_classes + 1,
+        config.model.num_hidden,
+    )
     model.apply(weights_init)
 
     return model
