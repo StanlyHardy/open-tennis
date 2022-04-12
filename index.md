@@ -1,37 +1,215 @@
-## Welcome to GitHub Pages
+<div align="center">
 
-You can use the [editor on GitHub](https://github.com/StanlyHardy/open-tennis/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+# OpenTennis
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+OpenTennis is a framework under active development to analyze Tennis matches. Currently, it supports cour edge extraction, and player information extraction via scoreboard analysis.  
 
-### Markdown
+[System Architecture](#system-architecture)  • 
+[Features](#features)  • 
+ [Demo](#demo)  • 
+[Installation](#installation)  • 
+[Inference](#inference)  • 
+[Configurations](#configurations)  • 
+[Roadmap](#roadmap)
+ 
+</div>
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## <div align="center">System Architecture</div>
 
-```markdown
-Syntax highlighted code block
+ <p>
+   <img  src="https://github.com/StanlyHardy/score_watch/blob/experimental/assets/graphics/sys_arch.png"></a>
+</p>
 
-# Header 1
-## Header 2
-### Header 3
+## <div align="center">Features</div>
+- [x] Court Edge Detection
+- [x] Recognize the Player Names.
+- [x] Determine the scores.
+- [x] Find the current serving player.
+- [x] Evaluate the average correct match.
 
-- Bulleted
-- List
+## <div align="center">Demo</div>
 
-1. Numbered
-2. List
+ <p>
+   <img  src="https://github.com/StanlyHardy/score_watch/blob/experimental/assets/demo/demo1.png">
+</p>
 
-**Bold** and _Italic_ and `Code` text
 
-[Link](url) and ![Image](src)
+## <div align="center">Installation</div>
+#### <div>Requirements</div>
+- Linux
+- CUDA>= 10.0
+- Python >= 3.6
+
+#### Steps
+
+1. Create a virtual conda environment and activate it.
+
+```bash
+conda create -n scorewatch python=3.9 -y
+conda activate scorewatch
 ```
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
+2. Install Pytorch
 
-### Jekyll Themes
+```bash
+conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
+```
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/StanlyHardy/open-tennis/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+4. Install TensorRT
 
-### Support or Contact
+```bash
+pip install -U nvidia-tensorrt --index-url https://pypi.ngc.nvidia.com
+```
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+5. Clone the repository
+
+```bash
+git clone https://github.com/StanlyHardy/score_watch # clone
+cd score_watch
+```
+
+6. Install other requirements
+
+```bash
+pip install -r requirements.txt # install
+```
+7. The provided `.engine` file is platform specifc. So, export `detector.pt` within `assets/models` to TensorRT engine using the official <a href="https://github.com/ultralytics/yolov5/blob/master/export.py">exporter </a>. 
+
+## <div align="center">Inference</div>
+
+Inference could run either on Video or Image streams. The configuration could be changed
+via `assets/config/app_config.yaml`. If the `evaluation` is set to true, the inference occurs in validatation dataset
+and performs evaluation to determine the Average scores for correct Player names, Scores and Serving Player. Please
+change the input paths of `video` or `images`.
+
+```
+python app.py 
+```
+
+## <div align="center">Configurations</div>
+
+<details>
+ <summary>App configuration(click to expand)</summary>
+  <br>
+<table>
+ <tr>
+    <th>Section</th>
+    <th>Feature</th>
+    <th>Description</th>
+  </tr>
+ <tr>
+  <td rowspan="6">&nbsp; Paths </td>
+  <td>&nbsp; <code>video_path</code></td>
+  <td>&nbsp;Path of the video on which the evaluation needs to be done.</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>img_path</code></td>
+  <td>&nbsp;Directory containing the test images. Ground truth needs to be available for evaluation with image set.</td>
+ </tr>
+  <tr>
+  <td>&nbsp;<code>players_path</code></td>
+  <td>&nbsp;Path containing player informations</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>groundtruth_path</code></td>
+  <td>&nbsp;Ground truth data which is in json format that has got the player information.</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>output_video_path</code></td>
+  <td>&nbsp;The path to save the video if the output needs to be saved and visualized later.</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>logs_path</code></td>
+  <td>&nbsp;Path where the output log will be saved.</td>
+ </tr>
+ <tr>
+  <td rowspan="5">&nbsp; Streamer </td>
+  <td>&nbsp; <code>should_draw'</code></td>
+  <td>&nbsp;Draws over the frames for visualization , if enabled.</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>view_imshow</code></td>
+  <td>&nbsp;The output visualization shall be turned on/off with this parameter.</td>
+ </tr>
+  <tr>
+  <td>&nbsp;<code>save_stream</code></td>
+  <td>&nbsp;Turning on this field enables the video output to be saved in the path defined in <code>output_video_path</code></td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>debug</code></td>
+  <td>&nbsp;Displays debug logs if enabled</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>evaluation</code></td>
+  <td>&nbsp;Turn on if the evaluation has to be done over the image set. Both image set and the annotations are required in this case.</td>
+ </tr>
+ <td rowspan="5">&nbsp; Models </td>
+  <td>&nbsp; <code>score_det_model'</code></td>
+  <td>&nbsp; Path of the score detector model.</td>
+ <tr>
+  <td>&nbsp;<code>detector_config</code></td>
+  <td>&nbsp; Path of the config file for the score detector. </td>
+ </tr>
+  <tr>
+  <td>&nbsp;<code>text_rec_model</code></td>
+  <td>&nbsp;CRNN Model path responsible for Player information recognition. </td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>text_rec_config</code></td>
+  <td>&nbsp;Path to the configuration for the CRNN model</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>ocr_engine</code></td>
+  <td>&nbsp;Choose between <code>CRNN</code> or <code>PyTesseract</code>. </td>
+ </tr>
+</table>
+</details>
+<details>
+ <summary>Detector Configuration(click to expand)</summary>
+ <br>
+<table>
+ <tr>
+    <th>Section</th>
+    <th>Feature</th>
+    <th>Description</th>
+  </tr>
+ <tr>
+  <td rowspan="5">&nbsp; YOLOv5 </td>
+  <td>&nbsp; <code>execution_env</code></td>
+  <td>&nbsp;ONNX Runtime provides support for CUDA, CPU and TensorRT. By default, CUDA is chosen. ONNX Runtime falls back to cpu if CUDA is unavailable.</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>conf_thresh</code></td>
+  <td>&nbsp;Detection confidence</td>
+ </tr>
+  <tr>
+  <td>&nbsp;<code>iou_thres</code></td>
+  <td>&nbsp;IOU threshold to gauge the overlap.</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>warm_up</code></td>
+  <td>&nbsp;Number of samples to be used during the warm up phase.</td>
+ </tr>
+ <tr>
+  <td>&nbsp;<code>class_labels</code></td>
+  <td>&nbsp;Class labels</td>
+ </tr>
+ <tr>
+</table>
+</details>
+
+## <div align="center">Roadmap</div>
+
+- [ ] Train CRNN with wide set of Data from ATP/Wimbledon matches.
+- [ ] Implement Ball Tracking, Trajectory Analysis
+- [ ] Player tracking.
+- [ ] Predict the style and the outcome of shot
+- [ ] Player activity analysis
+
+
+## <div align="center">Acknowledgement</div>
+
+* [ONNX Runtime](https://onnxruntime.ai/docs/install/)&nbsp;
+* [YOLOv5](https://github.com/ultralytics/yolov5)&nbsp;
+* [TesserOCR](https://github.com/sirfz/tesserocr)&nbsp;
+* [CRNN](https://www.kaggle.com/alizahidraja/custom-ocr-crnn)&nbsp;
